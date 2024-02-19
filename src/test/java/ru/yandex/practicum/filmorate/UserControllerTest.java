@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 public class UserControllerTest {
-    UserController userController;
+    UserController userController = new UserController();
     User user;
     private static Validator validator;
 
