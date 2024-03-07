@@ -1,52 +1,63 @@
 package ru.yandex.practicum.filmorate;
 
-import org.junit.jupiter.api.BeforeEach;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import ru.yandex.practicum.filmorate.controller.UserController;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.model.User;
 
-import javax.validation.ConstraintViolation;
-import javax.validation.Validation;
-import javax.validation.Validator;
-import javax.validation.ValidatorFactory;
 import java.time.LocalDate;
-import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
+@AutoConfigureMockMvc
 public class UserControllerTest {
-    UserController userController = new UserController();
+    @Autowired
+    protected MockMvc mockMvc;
+    @Autowired
+    protected ObjectMapper objectMapper;
     User user;
-    private static Validator validator;
-
-    static {
-        ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory();
-        validator = validatorFactory.usingContext().getValidator();
-    }
-
-    @BeforeEach
-    public void init() {
-        user = User.builder().id(0).login("log in").email("mail.ru").birthday(LocalDate.of(2256, 12, 12)).build();
-    }
+    User user2;
 
     @Test
-    public void createUserNoName() {
-        userController.create(user);
-        assertEquals(user.getName(), user.getLogin());
-    }
-
-    @Test
-    public void validatorsTest() {
-        Set<ConstraintViolation<User>> validates = validator.validate(user);
-        assertEquals(3, validates.size());
-        validates.stream().map(ConstraintViolation::getMessage)
-                .forEach(System.out::println);
-        user.setLogin(" ");
-        Set<ConstraintViolation<User>> validates1 = validator.validate(user);
-        assertEquals(4, validates1.size());
-        validates1.stream().map(ConstraintViolation::getMessage)
-                .forEach(System.out::println);
+    public void friendTest() throws Exception {
+        user = User.builder().id(1)
+                .email("vasya@mail.ru")
+                .login("Vasya")
+                .birthday(LocalDate.of(1990, 12, 12))
+                .build();
+        mockMvc.perform(post("/users")
+                        .content(objectMapper.writeValueAsString(user))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id").isNumber())
+                .andExpect(jsonPath("$.email").value("vasya@mail.ru"))
+                .andExpect(jsonPath("$.login").value("Vasya"))
+                .andExpect(jsonPath("$.name").value("Vasya"))
+                .andExpect(jsonPath("$.birthday").value("1990-12-12"))
+                .andExpect(jsonPath("$.friends").isEmpty())
+                .andExpect(status().is(200));
+        user2 = User.builder().id(2)
+                .email("vasya1@mail.ru")
+                .login("Vasya1")
+                .birthday(LocalDate.of(1991, 12, 12))
+                .build();
+        mockMvc.perform(post("/users")
+                        .content(objectMapper.writeValueAsString(user2))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id").isNumber())
+                .andExpect(jsonPath("$.email").value("vasya1@mail.ru"))
+                .andExpect(jsonPath("$.login").value("Vasya1"))
+                .andExpect(jsonPath("$.name").value("Vasya1"))
+                .andExpect(jsonPath("$.birthday").value("1991-12-12"))
+                .andExpect(jsonPath("$.friends").isEmpty())
+                .andExpect(status().is(200));
+        mockMvc.perform(put("/users/1/friends/2").content(objectMapper.writeValueAsString(user)).contentType(MediaType.APPLICATION_JSON));
     }
 }
