@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.validators.Marker;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
+import java.util.Set;
 
 
 @Data
@@ -24,4 +25,5 @@ public class User {
     @PastOrPresent(message = "День рождения не может быть в будущем.")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate birthday;
+    private Set<Integer> friends;
 }

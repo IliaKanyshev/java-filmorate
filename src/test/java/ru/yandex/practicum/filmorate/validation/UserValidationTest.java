@@ -1,10 +1,10 @@
-package ru.yandex.practicum.filmorate;
+package ru.yandex.practicum.filmorate.validation;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import ru.yandex.practicum.filmorate.controller.UserController;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
@@ -13,13 +13,13 @@ import javax.validation.ValidatorFactory;
 import java.time.LocalDate;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
-public class UserControllerTest {
-    UserController userController = new UserController();
-    User user;
-    private static Validator validator;
+public class UserValidationTest {
+    private static final Validator validator;
+    private User user;
+    InMemoryUserStorage storage = new InMemoryUserStorage();
 
     static {
         ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory();
@@ -33,8 +33,19 @@ public class UserControllerTest {
 
     @Test
     public void createUserNoName() {
-        userController.create(user);
+        storage.createUser(user);
         assertEquals(user.getName(), user.getLogin());
+    }
+
+    @Test
+    void validateUserOk() {
+        user = User.builder().id(3)
+                .email("vasya@mail.ru")
+                .login("Vasya")
+                .name("Vasiliy")
+                .birthday(LocalDate.of(1990, 12, 12))
+                .build();
+        validator.validate(user);
     }
 
     @Test

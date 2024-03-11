@@ -1,9 +1,9 @@
-package ru.yandex.practicum.filmorate;
+package ru.yandex.practicum.filmorate.validation;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import ru.yandex.practicum.filmorate.controller.FilmController;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import javax.validation.ConstraintViolation;
@@ -13,13 +13,14 @@ import javax.validation.ValidatorFactory;
 import java.time.LocalDate;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
-public class FilmControllerTest {
-    Film film;
-    FilmController filmController = new FilmController();
-    private static Validator validator;
+@AutoConfigureMockMvc
+public class FilmValidationTest {
+    private static final Validator validator;
+
+    private Film film;
 
     static {
         ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory();
@@ -29,6 +30,18 @@ public class FilmControllerTest {
     @BeforeEach
     public void init() {
         film = Film.builder().id(0).name(" ").description("").releaseDate(null).duration(-200).build();
+    }
+
+    @Test
+    public void validateFilmOK() {
+        film.toBuilder()
+                .id(1)
+                .name("film")
+                .description("bestFilm")
+                .releaseDate(LocalDate.of(2000, 12, 12))
+                .duration(100)
+                .build();
+        validator.validate(film);
     }
 
     @Test
