@@ -6,7 +6,6 @@ import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Component
 @Slf4j
@@ -60,48 +59,11 @@ public class InMemoryUserStorage implements UserStorage {
         return users.values().stream()
                 .filter(user -> user.getId() == id)
                 .findFirst()
-                .orElseThrow(() -> new NotFoundException(String.format("Пользователь с id %d не найден.", id)));
+                .orElseThrow(() -> {
+                    log.warn("Пользователь с id {} не найден.", id);
+                    return new NotFoundException(String.format("Пользователь с id %d не найден.", id));
+                });
     }
-
-    @Override
-    public User addFriend(Integer userId, Integer friendId) {
-        if (users.containsKey(userId) && users.containsKey(friendId)) {
-            findUserById(userId).getFriends().add(friendId);
-            findUserById(friendId).getFriends().add(userId);
-        } else {
-            log.warn("Пользователь с id {} или {} не найден.", userId, friendId);
-            throw new NotFoundException(String.format("Пользователь с id %d или %d не найден.", userId, friendId));
-        }
-        log.info("Пользователь {} стал другом с {}", findUserById(userId).getName(), findUserById(friendId).getName());
-        return findUserById(userId);
-    }
-
-    @Override
-    public User deleteFriend(Integer userId, Integer friendId) {
-        if (users.containsKey(userId) && users.containsKey(friendId)) {
-            findUserById(userId).getFriends().remove(friendId);
-            findUserById(friendId).getFriends().remove(userId);
-        } else {
-            log.warn("Пользователь с id {} или {} не найден.", userId, friendId);
-            throw new NotFoundException(String.format("Пользователь с id %d или %d не найден.", userId, friendId));
-        }
-        log.info("Пользователи {} и {} перестали дружить.", findUserById(userId).getName(), findUserById(friendId).getName());
-        return findUserById(userId);
-    }
-
-    @Override
-    public List<User> getUserFriends(Integer id) {
-        return findUserById(id).getFriends().stream().map(this::findUserById).collect(Collectors.toList());
-    }
-
-    @Override
-    public List<User> getCommonFriends(Integer userId, Integer user2Id) {
-        return findUserById(userId).getFriends().stream()
-                .filter(findUserById(user2Id).getFriends()::contains)
-                .map(this::findUserById)
-                .collect(Collectors.toList());
-    }
-
 
     public void nameCheck(User user) {
         if (user.getName() == null || user.getName().isEmpty()) {

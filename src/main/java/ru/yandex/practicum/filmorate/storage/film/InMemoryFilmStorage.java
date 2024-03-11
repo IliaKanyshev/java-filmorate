@@ -6,7 +6,6 @@ import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -58,40 +57,9 @@ public class InMemoryFilmStorage implements FilmStorage {
         return films.values().stream()
                 .filter(film -> film.getId() == id)
                 .findFirst()
-                .orElseThrow(() -> new NotFoundException(String.format("Фильм с id %d не найден.", id)));
-    }
-
-    @Override
-    public Film like(Integer filmId, Integer userId) {
-        if (films.containsKey(filmId)) {
-            Film film = films.get(filmId);
-            film.getLikes().add(userId);
-            log.info("Пользователь с id {} поставил лайк фильму {}.", userId, film.getName());
-        } else {
-            log.warn("Фильм с id {} не найден.", filmId);
-            throw new NotFoundException(String.format("Фильм с id %d не найден.", filmId));
-        }
-        return getFilmById(filmId);
-    }
-
-    @Override
-    public Film deleteLike(Integer filmId, Integer userId) {
-        if (getFilmById(filmId).getLikes().contains(userId)) {
-            getFilmById(filmId).getLikes().remove(userId);
-        } else {
-            log.warn("Лайк с id {} не найден.", userId);
-            throw new NotFoundException(String.format("Лайк с id %d не найден.", userId));
-        }
-        log.info("Пользователь с id {} удалил лайк у фильма с id {}.", userId, filmId);
-        return getFilmById(filmId);
-    }
-
-    @Override
-    public List<Film> getPopularFilms(Integer count) {
-        log.info("Топ {} популярных фильмов", count);
-        return films.values().stream()
-                .sorted((film1, film2) -> film2.getLikes().size() - film1.getLikes().size())
-                .limit(count)
-                .collect(Collectors.toList());
+                .orElseThrow(() -> {
+                    log.warn("Фильм с id {} не найден", id);
+                    return new NotFoundException(String.format("Фильм с id %d не найден.", id));
+                });
     }
 }
