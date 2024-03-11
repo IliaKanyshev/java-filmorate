@@ -92,7 +92,7 @@ public class UserControllerTest {
 
     @SneakyThrows
     @Test
-    public void UserCreateAndFriendAddTest() {
+    public void userCreateAndFriendAddTest() {
         mockMvc.perform(post("/users")
                         .content(objectMapper.writeValueAsString(user))
                         .contentType(MediaType.APPLICATION_JSON))
