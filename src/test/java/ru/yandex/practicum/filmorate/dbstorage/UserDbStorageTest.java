@@ -22,7 +22,6 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class UserDbStorageTest {
-    // private final JdbcTemplate jdbcTemplate;
     private final UserDbStorage userStorage;
     private User user1;
     private User user3;
