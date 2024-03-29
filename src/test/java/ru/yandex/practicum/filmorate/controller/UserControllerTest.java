@@ -1,10 +1,12 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -21,8 +24,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@AutoConfigureTestDatabase
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
 @SpringBootTest
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @AutoConfigureMockMvc
 public class UserControllerTest {
     @Autowired
@@ -39,26 +44,32 @@ public class UserControllerTest {
         user = User.builder()
                 .id(1)
                 .email("vasya@mail.ru")
-                .login("Vasya")
-                .birthday(LocalDate.of(1990, 12, 12))
+                .login("vasya")
+                .name("vasek")
+                .birthday(LocalDate.of(2020, 12, 12))
+                .friends(new HashSet<>())
                 .build();
         user2 = User.builder()
-                .id(2)
+                .id(1)
                 .email("vasya1@mail.ru")
                 .login("Vasya1")
+                .name("Vasya1")
                 .birthday(LocalDate.of(1991, 12, 12))
+                .friends(new HashSet<>())
                 .build();
         user3 = User.builder()
                 .id(3)
                 .login("log in")
                 .email("mail.ru")
                 .birthday(LocalDate.of(2256, 12, 12))
+                .friends(new HashSet<>())
                 .build();
         user4 = User.builder()
                 .id(4)
                 .login("user4")
                 .email("user4@mail.ru")
                 .birthday(LocalDate.of(2000, 12, 12))
+                .friends(new HashSet<>())
                 .build();
     }
 
@@ -98,9 +109,9 @@ public class UserControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.id").isNumber())
                 .andExpect(jsonPath("$.email").value("vasya@mail.ru"))
-                .andExpect(jsonPath("$.login").value("Vasya"))
-                .andExpect(jsonPath("$.name").value("Vasya"))
-                .andExpect(jsonPath("$.birthday").value("1990-12-12"))
+                .andExpect(jsonPath("$.login").value("vasya"))
+                .andExpect(jsonPath("$.name").value("vasek"))
+                .andExpect(jsonPath("$.birthday").value("2020-12-12"))
                 .andExpect(jsonPath("$.friends").isEmpty())
                 .andExpect(status().is(200));
         mockMvc.perform(post("/users")
@@ -133,7 +144,7 @@ public class UserControllerTest {
         mockMvc.perform(post("/users")
                         .content(objectMapper.writeValueAsString(user))
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.name").value("Vasya"));
+                .andExpect(jsonPath("$.name").value("vasek"));
         user = user.toBuilder().name("Petya").build();
         mockMvc.perform(put("/users").content(objectMapper.writeValueAsString(user))
                 .contentType(MediaType.APPLICATION_JSON));
@@ -162,9 +173,9 @@ public class UserControllerTest {
         mockMvc.perform(get("/users/1"))
                 .andExpect(jsonPath("$.id").isNumber())
                 .andExpect(jsonPath("$.email").value("vasya@mail.ru"))
-                .andExpect(jsonPath("$.login").value("Vasya"))
-                .andExpect(jsonPath("$.name").value("Vasya"))
-                .andExpect(jsonPath("$.birthday").value("1990-12-12"))
+                .andExpect(jsonPath("$.login").value("vasya"))
+                .andExpect(jsonPath("$.name").value("vasek"))
+                .andExpect(jsonPath("$.birthday").value("2020-12-12"))
                 .andExpect(jsonPath("$.friends").isEmpty())
                 .andExpect(status().is(200));
     }

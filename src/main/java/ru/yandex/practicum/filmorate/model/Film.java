@@ -8,6 +8,7 @@ import ru.yandex.practicum.filmorate.validators.ReleaseDateConstraint;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 
 
@@ -27,4 +28,6 @@ public class Film {
     @Positive(message = "Продолжительность фильма должна быть больше 0.")
     private int duration;
     private Set<Integer> likes;
+    private Mpa mpa;
+    private List<Genre> genres;
 }
