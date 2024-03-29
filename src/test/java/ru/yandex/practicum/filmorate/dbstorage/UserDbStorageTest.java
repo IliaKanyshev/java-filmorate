@@ -47,7 +47,7 @@ public class UserDbStorageTest {
     }
 
     @Test
-    public void FindUserByIdTest() {
+    public void findUserByIdTest() {
         userStorage.createUser(user1);
         User savedUser = userStorage.findUserById(1);
         assertThat(savedUser)
