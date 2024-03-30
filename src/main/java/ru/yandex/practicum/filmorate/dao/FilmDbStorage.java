@@ -108,7 +108,7 @@ public class FilmDbStorage implements FilmStorage {
         if (film.getGenres() != null) {
             for (Genre genre : film.getGenres()) {
                 jdbcTemplate.update(
-                        "INSERT INTO GENRE (film_id, genre_id) VALUES (?, ?);",
+                        "MERGE INTO GENRE (film_id, genre_id) VALUES (?, ?);",
                         film.getId(),
                         genre.getId()
                 );
