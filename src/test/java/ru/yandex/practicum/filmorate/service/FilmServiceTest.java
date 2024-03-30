@@ -4,23 +4,29 @@ import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.film.FilmService;
-import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
-import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest
+@AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
+@SpringBootTest
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class FilmServiceTest {
-    private FilmService filmService;
-    private UserStorage userStorage;
+    private final FilmService filmService;
+    private final UserStorage userStorage;
     private Film film;
     private Film film2;
     private Film film3;
@@ -30,14 +36,15 @@ public class FilmServiceTest {
 
     @BeforeEach
     public void init() {
-        userStorage = new InMemoryUserStorage();
-        filmService = new FilmService(new InMemoryFilmStorage(), userStorage);
         film = Film.builder()
                 .id(1)
                 .name("film")
-                .description("filmDescr")
-                .releaseDate(LocalDate.of(1990, 12, 12))
+                .description("desc")
                 .duration(100)
+                .releaseDate(LocalDate.of(2020, 12, 12))
+                .mpa(new Mpa(1, "G"))
+                .genres(List.of(new Genre(1, "Комедия")))
+                .likes(new HashSet<>())
                 .build();
         film2 = Film.builder()
                 .id(2)
@@ -45,6 +52,9 @@ public class FilmServiceTest {
                 .description("filmDescr2")
                 .releaseDate(LocalDate.of(1991, 12, 12))
                 .duration(100)
+                .mpa(new Mpa(1, "G"))
+                .genres(List.of(new Genre(1, "Комедия")))
+                .likes(new HashSet<>())
                 .build();
         film3 = Film.builder()
                 .id(3)
@@ -54,6 +64,9 @@ public class FilmServiceTest {
                         "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
                 .releaseDate(LocalDate.of(1852, 12, 12))
                 .duration(0)
+                .mpa(new Mpa(1, "G"))
+                .genres(List.of(new Genre(1, "Комедия")))
+                .likes(new HashSet<>())
                 .build();
         film4 = Film.builder()
                 .id(4)
@@ -61,18 +74,25 @@ public class FilmServiceTest {
                 .description("filmDescr4")
                 .releaseDate(LocalDate.of(1992, 12, 12))
                 .duration(100)
+                .mpa(new Mpa(1, "G"))
+                .genres(List.of(new Genre(1, "Комедия")))
+                .likes(new HashSet<>())
                 .build();
         user = User.builder()
                 .id(1)
                 .email("vasya@mail.ru")
+                .name("Vas")
                 .login("Vasya")
                 .birthday(LocalDate.of(1990, 12, 12))
+                .friends(new HashSet<>())
                 .build();
         user2 = User.builder()
                 .id(2)
                 .email("vasya1@mail.ru")
+                .name("Vas1")
                 .login("Vasya1")
                 .birthday(LocalDate.of(1991, 12, 12))
+                .friends(new HashSet<>())
                 .build();
     }
 

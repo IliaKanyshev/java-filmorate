@@ -4,20 +4,23 @@ import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.user.UserService;
-import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-
-@SpringBootTest
+@AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
+@SpringBootTest
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class UserServiceTest {
-    private UserService userService;
+    private final UserService userService;
     private User user;
     private User user2;
     private User user3;
@@ -25,21 +28,24 @@ public class UserServiceTest {
 
     @BeforeEach
     public void init() {
-        userService = new UserService(new InMemoryUserStorage());
         user = User.builder()
                 .id(1)
                 .email("vasya@mail.ru")
                 .login("Vasya")
                 .birthday(LocalDate.of(1990, 12, 12))
+                .friends(new HashSet<>())
                 .build();
         user2 = User.builder()
                 .id(2)
                 .email("vasya1@mail.ru")
+                .name("Vas1")
                 .login("Vasya1")
                 .birthday(LocalDate.of(1991, 12, 12))
+                .friends(new HashSet<>())
                 .build();
         user3 = User.builder()
                 .id(3)
+                .name("vas")
                 .login(" ")
                 .email("mail.ru")
                 .birthday(LocalDate.of(2256, 12, 12))
@@ -101,7 +107,7 @@ public class UserServiceTest {
         userService.createUser(user2);
         userService.addFriend(1, 2);
         assertEquals(userService.findUserById(1).getFriends().size(), 1);
-        assertEquals(userService.findUserById(2).getFriends().size(), 1);
+        assertEquals(userService.findUserById(2).getFriends().size(), 0);
     }
 
     @Test

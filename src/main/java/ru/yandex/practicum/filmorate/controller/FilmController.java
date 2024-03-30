@@ -19,8 +19,8 @@ import java.util.*;
 @Validated
 @RequiredArgsConstructor
 public class FilmController {
-    private final FilmService filmService;
 
+    private final FilmService filmService;
 
     @GetMapping
     public List<Film> getFilms() {

@@ -1,10 +1,12 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
@@ -12,9 +14,13 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.List;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasSize;
@@ -23,8 +29,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@AutoConfigureTestDatabase
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
 @SpringBootTest
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @AutoConfigureMockMvc
 public class FilmControllerTest {
     @Autowired
@@ -43,16 +51,22 @@ public class FilmControllerTest {
         film = Film.builder()
                 .id(1)
                 .name("film")
-                .description("filmDescr")
-                .releaseDate(LocalDate.of(1990, 12, 12))
+                .description("desc")
                 .duration(100)
+                .releaseDate(LocalDate.of(2020, 12, 12))
+                .mpa(new Mpa(1, "G"))
+                .genres(List.of(new Genre(1, "Комедия")))
+                .likes(new HashSet<>())
                 .build();
         film2 = Film.builder()
-                .id(2)
-                .name("film2")
-                .description("filmDescr2")
-                .releaseDate(LocalDate.of(1991, 12, 12))
+                .id(1)
+                .name("film1")
+                .description("desc1")
                 .duration(100)
+                .releaseDate(LocalDate.of(2020, 12, 12))
+                .mpa(new Mpa(1, "G"))
+                .genres(List.of(new Genre(1, "Комедия")))
+                .likes(new HashSet<>())
                 .build();
         film3 = Film.builder()
                 .id(3)
@@ -64,11 +78,14 @@ public class FilmControllerTest {
                 .duration(0)
                 .build();
         film4 = Film.builder()
-                .id(4)
+                .id(1)
                 .name("film4")
-                .description("filmDescr4")
-                .releaseDate(LocalDate.of(1992, 12, 12))
+                .description("desc4")
                 .duration(100)
+                .releaseDate(LocalDate.of(2020, 12, 12))
+                .mpa(new Mpa(1, "G"))
+                .genres(List.of(new Genre(1, "Комедия")))
+                .likes(new HashSet<>())
                 .build();
         user = User.builder()
                 .id(1)
@@ -119,8 +136,8 @@ public class FilmControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.id").isNumber())
                 .andExpect(jsonPath("$.name").value("film"))
-                .andExpect(jsonPath("$.description").value("filmDescr"))
-                .andExpect(jsonPath("$.releaseDate").value("1990-12-12"))
+                .andExpect(jsonPath("$.description").value("desc"))
+                .andExpect(jsonPath("$.releaseDate").value("2020-12-12"))
                 .andExpect(jsonPath("$.duration").value(100))
                 .andExpect(jsonPath("$.likes").isEmpty())
                 .andExpect(status().is(200));
@@ -179,8 +196,8 @@ public class FilmControllerTest {
         mockMvc.perform(get("/films/1"))
                 .andExpect(jsonPath("$.id").isNumber())
                 .andExpect(jsonPath("$.name").value("film"))
-                .andExpect(jsonPath("$.description").value("filmDescr"))
-                .andExpect(jsonPath("$.releaseDate").value("1990-12-12"))
+                .andExpect(jsonPath("$.description").value("desc"))
+                .andExpect(jsonPath("$.releaseDate").value("2020-12-12"))
                 .andExpect(jsonPath("$.duration").value(100))
                 .andExpect(jsonPath("$.likes").isEmpty())
                 .andExpect(status().is(200));
