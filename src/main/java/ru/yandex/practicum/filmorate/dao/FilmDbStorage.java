@@ -45,7 +45,7 @@ public class FilmDbStorage implements FilmStorage {
                 .usingGeneratedKeyColumns("FILM_ID");
         int key = simpleJdbcInsert.executeAndReturnKey(filmToMap(film)).intValue();
         film.setId(key);
-        checkFilmGenres(film);
+        addFilmGenres(film);
         log.debug("Добавлен фильм {} с ID {}.", film.getName(), film.getId());
         return film;
     }
@@ -55,14 +55,13 @@ public class FilmDbStorage implements FilmStorage {
         getFilmById(film.getId());
         String sqlQuery = "UPDATE FILMS SET NAME = ?, DESCRIPTION = ?, RELEASE_DATE = ?, DURATION = ?, MPA_RATING_ID = ? WHERE FILM_ID = ?";
         jdbcTemplate.update(sqlQuery, film.getName(), film.getDescription(), film.getReleaseDate(), film.getDuration(), film.getMpa().getId(), film.getId());
-        checkFilmGenres(film);
+        addFilmGenres(film);
         log.info("Фильм с id {} обновлен.", film.getId());
         return getFilmById(film.getId());
     }
 
     @Override
     public void deleteFilmById(Integer id) {
-        getFilmById(id);
         String sqlQuery = "DELETE FROM FILMS WHERE FILM_ID = ?";
         jdbcTemplate.update(sqlQuery, id);
         log.info("Фильм с id {} удален.", id);
@@ -105,7 +104,7 @@ public class FilmDbStorage implements FilmStorage {
         return values;
     }
 
-    private void checkFilmGenres(Film film) {
+    private void addFilmGenres(Film film) {
         if (film.getGenres() != null) {
             for (Genre genre : film.getGenres()) {
                 jdbcTemplate.update(

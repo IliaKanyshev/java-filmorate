@@ -21,7 +21,7 @@ public class FriendDbStorage implements FriendStorage {
     public User addFriend(Integer userId, Integer friendId) {
         userDbStorage.findUserById(userId);
         userDbStorage.findUserById(friendId);
-        jdbcTemplate.update("INSERT INTO friends(USER_ID, FRIEND_ID) VALUES(?, ?)", userId, friendId);
+        jdbcTemplate.update("MERGE INTO friends(USER_ID, FRIEND_ID) VALUES(?, ?)", userId, friendId);
         log.info("Пользователь с id {} добавил в друзья пользователя с id {}", userId, friendId);
         userDbStorage.findUserById(userId).setFriends(getUserFriends(userId).stream()
                 .map(User::getId)
@@ -44,7 +44,8 @@ public class FriendDbStorage implements FriendStorage {
     @Override
     public List<User> getUserFriends(Integer id) {
         userDbStorage.findUserById(id);
-        String sqlQuery = "SELECT * FROM users WHERE user_id IN (SELECT friend_id FROM friends WHERE user_id = ?)";
+        String sqlQuery = "select * from USERS, FRIENDS " +
+                "where USERS.USER_ID = FRIENDS.FRIEND_ID AND FRIENDS.USER_ID = ?";
         log.info("Список друзей пользователья с id {}", id);
         return jdbcTemplate.query(sqlQuery, userDbStorage::mapRowToUser, id);
     }
@@ -53,9 +54,8 @@ public class FriendDbStorage implements FriendStorage {
     public List<User> getCommonFriends(Integer userId, Integer friendId) {
         userDbStorage.findUserById(userId);
         userDbStorage.findUserById(friendId);
-        String sqlQuery = "SELECT * FROM users WHERE user_id IN (SELECT FRIEND_ID FROM friends " +
-                "WHERE user_id = ? AND friend_id IN " +
-                "(SELECT friend_id FROM friends WHERE user_id = ?))";
+        String sqlQuery = "select * from USERS u, FRIENDS f, FRIENDS o " +
+                "where u.USER_ID = f.FRIEND_ID AND u.USER_ID = o.FRIEND_ID AND f.USER_ID = ? AND o.USER_ID = ?";
         log.info("Список общих друзей пользователей с id {} и {}", userId, friendId);
         return jdbcTemplate.query(sqlQuery, userDbStorage::mapRowToUser, userId, friendId);
     }

@@ -4,7 +4,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
@@ -19,7 +18,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class UserValidationTest {
     private static final Validator validator;
     private User user;
-    InMemoryUserStorage storage = new InMemoryUserStorage();
 
     static {
         ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory();
@@ -29,12 +27,6 @@ public class UserValidationTest {
     @BeforeEach
     public void init() {
         user = User.builder().id(0).login("log in").email("mail.ru").birthday(LocalDate.of(2256, 12, 12)).build();
-    }
-
-    @Test
-    public void createUserNoName() {
-        storage.createUser(user);
-        assertEquals(user.getName(), user.getLogin());
     }
 
     @Test
