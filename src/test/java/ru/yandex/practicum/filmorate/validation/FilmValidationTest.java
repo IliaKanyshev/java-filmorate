@@ -47,7 +47,7 @@ public class FilmValidationTest {
     @Test
     public void validatorsTest() {
         Set<ConstraintViolation<Film>> validates = validator.validate(film);
-        assertEquals(4, validates.size());
+        assertEquals(5, validates.size());
         validates.stream().map(ConstraintViolation::getMessage)
                 .forEach(System.out::println);
         Film film1 = Film.builder().releaseDate(LocalDate.of(1800, 12, 12)).build();
