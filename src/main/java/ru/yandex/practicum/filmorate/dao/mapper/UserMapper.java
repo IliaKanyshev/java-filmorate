@@ -16,6 +16,7 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class UserMapper implements RowMapper<User> {
     private final JdbcTemplate jdbcTemplate;
+
     @Override
     public User mapRow(ResultSet resultSet, int rowNum) throws SQLException {
         return User.builder()
@@ -27,6 +28,7 @@ public class UserMapper implements RowMapper<User> {
                 .friends(getFriendsIds(resultSet.getInt("user_id")))
                 .build();
     }
+
     public Set<Integer> getFriendsIds(Integer id) {
         String sql = "SELECT FRIEND_ID FROM FRIENDS WHERE USER_ID = ?";
         Set<Integer> ids = new HashSet<>();
