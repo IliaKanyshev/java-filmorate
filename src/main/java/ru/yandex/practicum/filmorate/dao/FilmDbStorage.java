@@ -12,13 +12,10 @@ import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.film.GenreStorage;
-import ru.yandex.practicum.filmorate.storage.film.LikeStorage;
-import ru.yandex.practicum.filmorate.storage.film.MpaStorage;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Component
 @Slf4j
@@ -26,9 +23,6 @@ import java.util.*;
 @Primary
 public class FilmDbStorage implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;
-  /*  private final MpaStorage mpaStorage;
-    private final GenreStorage genreStorage;
-    private final LikeStorage likeStorage; */
     private final FilmMapper filmMapper;
 
     @Override
@@ -81,19 +75,6 @@ public class FilmDbStorage implements FilmStorage {
             throw new NotFoundException(String.format("Фильм с id %d не найден.", id));
         }
     }
-
-  /*  private Film mapRowToFilm(ResultSet resultSet, int rowNum) throws SQLException {
-        return Film.builder()
-                .id(resultSet.getInt("film_id"))
-                .name(resultSet.getString("name"))
-                .description(resultSet.getString("description"))
-                .releaseDate(resultSet.getDate("release_date").toLocalDate())
-                .duration(resultSet.getInt("duration"))
-                .mpa(mpaStorage.getMpaById(resultSet.getInt("mpa_rating_id")))
-                .likes(likeStorage.getLikesById(resultSet.getInt("film_id")))
-                .genres(genreStorage.getGenreListById(resultSet.getInt("film_id")))
-                .build();
-    } */
 
     public Map<String, Object> filmToMap(Film film) {
         Map<String, Object> values = new HashMap<>();
