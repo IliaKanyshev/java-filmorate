@@ -24,8 +24,8 @@ public class FilmService {
     public List<Film> getFilms() {
         List<Film> films = filmStorage.getFilms();
         for (Film film : films) {
-            film.setGenres(genreStorage.getGenreListById(film.getId()));
-            film.setLikes(likeStorage.getLikesById(film.getId()));
+            film.getGenres().addAll(genreStorage.getGenreListById(film.getId()));
+            film.getLikes().addAll(likeStorage.getLikesById(film.getId()));
         }
         return films;
     }
@@ -38,8 +38,8 @@ public class FilmService {
     }
 
     public Film updateFilm(Film film) {
-        film.setGenres(genreStorage.getGenreListById(film.getId()));
-        film.setLikes(likeStorage.getLikesById(film.getId()));
+        film.getGenres().addAll(genreStorage.getGenreListById(film.getId()));
+        film.getLikes().addAll(likeStorage.getLikesById(film.getId()));
         return filmStorage.updateFilm(film);
     }
 
@@ -49,8 +49,8 @@ public class FilmService {
 
     public Film getFilm(Integer id) {
         Film film = filmStorage.getFilmById(id);
-        film.setGenres(genreStorage.getGenreListById(film.getId()));
-        film.setLikes(likeStorage.getLikesById(film.getId()));
+        film.getGenres().addAll(genreStorage.getGenreListById(film.getId()));
+        film.getLikes().addAll(likeStorage.getLikesById(film.getId()));
         return film;
     }
 

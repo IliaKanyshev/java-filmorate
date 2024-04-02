@@ -37,8 +37,10 @@ public class GenreDbStorageTest {
                 .duration(100)
                 .releaseDate(LocalDate.of(2020, 12, 12))
                 .mpa(new Mpa(1, "G"))
-                .genres(List.of(new Genre(1, "Комедия")))
+                //.(List.of(new Genre(1, "Комедия")))
+                //   .likes(new HashSet<>())
                 .build();
+        film.getGenres().add((new Genre(1, "Комедия")));
     }
 
     @Test

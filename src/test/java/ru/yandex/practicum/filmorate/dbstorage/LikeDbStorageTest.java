@@ -11,13 +11,11 @@ import ru.yandex.practicum.filmorate.dao.FilmDbStorage;
 import ru.yandex.practicum.filmorate.dao.LikeDbStorage;
 import ru.yandex.practicum.filmorate.dao.UserDbStorage;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
 import java.util.HashSet;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -41,7 +39,6 @@ public class LikeDbStorageTest {
                 .duration(100)
                 .releaseDate(LocalDate.of(2020, 12, 12))
                 .mpa(new Mpa(1, "G"))
-                .genres(List.of(new Genre(1, "Комедия")))
                 .build();
         user = User.builder()
                 .id(1)
@@ -58,7 +55,7 @@ public class LikeDbStorageTest {
         filmDbStorage.createFilm(film);
         userDbStorage.createUser(user);
         likeDbStorage.like(film.getId(), user.getId());
-        assertEquals(filmDbStorage.getFilmById(film.getId()).getLikes().size(), 1);
+        assertEquals(likeDbStorage.getLikesById(film.getId()).size(), 1);
     }
 
     @Test
@@ -66,9 +63,9 @@ public class LikeDbStorageTest {
         filmDbStorage.createFilm(film);
         userDbStorage.createUser(user);
         likeDbStorage.like(film.getId(), user.getId());
-        assertEquals(filmDbStorage.getFilmById(film.getId()).getLikes().size(), 1);
+        assertEquals(likeDbStorage.getLikesById(film.getId()).size(), 1);
         likeDbStorage.deleteLike(film.getId(), user.getId());
-        assertEquals(filmDbStorage.getFilmById(film.getId()).getLikes().size(), 0);
+        assertEquals(likeDbStorage.getLikesById(film.getId()).size(), 0);
     }
 
     @Test

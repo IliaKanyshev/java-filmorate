@@ -16,9 +16,8 @@ import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
 import java.util.HashSet;
-import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
@@ -43,9 +42,10 @@ public class FilmServiceTest {
                 .duration(100)
                 .releaseDate(LocalDate.of(2020, 12, 12))
                 .mpa(new Mpa(1, "G"))
-                .genres(List.of(new Genre(1, "Комедия")))
-                .likes(new HashSet<>())
+                //.(List.of(new Genre(1, "Комедия")))
+                //   .likes(new HashSet<>())
                 .build();
+        film.getGenres().add((new Genre(1, "Комедия")));
         film2 = Film.builder()
                 .id(2)
                 .name("film2")
@@ -53,8 +53,8 @@ public class FilmServiceTest {
                 .releaseDate(LocalDate.of(1991, 12, 12))
                 .duration(100)
                 .mpa(new Mpa(1, "G"))
-                .genres(List.of(new Genre(1, "Комедия")))
-                .likes(new HashSet<>())
+               // .genres(List.of(new Genre(1, "Комедия")))
+              //  .likes(new HashSet<>())
                 .build();
         film3 = Film.builder()
                 .id(3)
@@ -65,8 +65,8 @@ public class FilmServiceTest {
                 .releaseDate(LocalDate.of(1852, 12, 12))
                 .duration(0)
                 .mpa(new Mpa(1, "G"))
-                .genres(List.of(new Genre(1, "Комедия")))
-                .likes(new HashSet<>())
+            //    .genres(List.of(new Genre(1, "Комедия")))
+             //   .likes(new HashSet<>())
                 .build();
         film4 = Film.builder()
                 .id(4)
@@ -75,8 +75,8 @@ public class FilmServiceTest {
                 .releaseDate(LocalDate.of(1992, 12, 12))
                 .duration(100)
                 .mpa(new Mpa(1, "G"))
-                .genres(List.of(new Genre(1, "Комедия")))
-                .likes(new HashSet<>())
+            //    .genres(List.of(new Genre(1, "Комедия")))
+            //    .likes(new HashSet<>())
                 .build();
         user = User.builder()
                 .id(1)

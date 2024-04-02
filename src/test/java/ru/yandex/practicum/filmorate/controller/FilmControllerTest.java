@@ -14,13 +14,10 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.List;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasSize;
@@ -55,8 +52,6 @@ public class FilmControllerTest {
                 .duration(100)
                 .releaseDate(LocalDate.of(2020, 12, 12))
                 .mpa(new Mpa(1, "G"))
-                .genres(List.of(new Genre(1, "Комедия")))
-                .likes(new HashSet<>())
                 .build();
         film2 = Film.builder()
                 .id(1)
@@ -65,8 +60,6 @@ public class FilmControllerTest {
                 .duration(100)
                 .releaseDate(LocalDate.of(2020, 12, 12))
                 .mpa(new Mpa(1, "G"))
-                .genres(List.of(new Genre(1, "Комедия")))
-                .likes(new HashSet<>())
                 .build();
         film3 = Film.builder()
                 .id(3)
@@ -84,8 +77,6 @@ public class FilmControllerTest {
                 .duration(100)
                 .releaseDate(LocalDate.of(2020, 12, 12))
                 .mpa(new Mpa(1, "G"))
-                .genres(List.of(new Genre(1, "Комедия")))
-                .likes(new HashSet<>())
                 .build();
         user = User.builder()
                 .id(1)
