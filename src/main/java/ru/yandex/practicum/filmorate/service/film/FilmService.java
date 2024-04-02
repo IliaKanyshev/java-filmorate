@@ -71,8 +71,14 @@ public class FilmService {
     }
 
     public List<Film> getPopularFilms(Integer count) {
-
         log.info("Топ {} популярных фильмов", count);
-        return likeStorage.getPopularFilms(count);
+        List<Film> films = likeStorage.getPopularFilms(count);
+        films.forEach(
+                film -> {
+                    film.getLikes().addAll(likeStorage.getLikesById(film.getId()));
+                    film.getGenres().addAll(genreStorage.getGenreListById(film.getId()));
+                }
+        );
+        return films;
     }
 }
