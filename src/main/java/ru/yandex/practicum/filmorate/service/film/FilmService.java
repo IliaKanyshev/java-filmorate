@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.film.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.film.LikeStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
@@ -18,9 +19,15 @@ public class FilmService {
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
     private final LikeStorage likeStorage;
+    private final GenreStorage genreStorage;
 
     public List<Film> getFilms() {
-        return filmStorage.getFilms();
+        List<Film> films = filmStorage.getFilms();
+        for (Film film : films) {
+            film.setGenres(genreStorage.getGenreListById(film.getId()));
+            film.setLikes(likeStorage.getLikesById(film.getId()));
+        }
+        return films;
     }
 
     public Film createFilm(Film film) {
@@ -31,6 +38,8 @@ public class FilmService {
     }
 
     public Film updateFilm(Film film) {
+        film.setGenres(genreStorage.getGenreListById(film.getId()));
+        film.setLikes(likeStorage.getLikesById(film.getId()));
         return filmStorage.updateFilm(film);
     }
 
@@ -39,7 +48,10 @@ public class FilmService {
     }
 
     public Film getFilm(Integer id) {
-        return filmStorage.getFilmById(id);
+        Film film = filmStorage.getFilmById(id);
+        film.setGenres(genreStorage.getGenreListById(film.getId()));
+        film.setLikes(likeStorage.getLikesById(film.getId()));
+        return film;
     }
 
     public Film like(Integer filmId, Integer userId) {
@@ -59,6 +71,7 @@ public class FilmService {
     }
 
     public List<Film> getPopularFilms(Integer count) {
+
         log.info("Топ {} популярных фильмов", count);
         return likeStorage.getPopularFilms(count);
     }

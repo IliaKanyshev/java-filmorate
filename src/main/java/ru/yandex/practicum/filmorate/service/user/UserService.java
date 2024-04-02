@@ -8,6 +8,7 @@ import ru.yandex.practicum.filmorate.storage.user.FriendStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -40,25 +41,36 @@ public class UserService {
     }
 
     public User addFriend(Integer userId, Integer friendId) {
-        findUserById(userId);
-        findUserById(friendId);
+        User user = findUserById(userId);
+        User friend = findUserById(friendId);
         friendStorage.addFriend(userId, friendId);
-        log.info("Пользователь {} стал другом с {}", findUserById(userId).getName(), findUserById(friendId).getName());
-        return findUserById(userId);
+        user.setFriends(getUserFriends(userId).stream()
+                .map(User::getId)
+                .collect(Collectors.toSet()));
+        log.info("Пользователь {} стал другом с {}", user.getName(), friend.getName());
+        return user;
     }
 
     public User deleteFriend(Integer userId, Integer friendId) {
+        User user = findUserById(userId);
+        User friend = findUserById(friendId);
         friendStorage.deleteFriend(userId, friendId);
-        log.info("Пользователи {} и {} перестали дружить.", findUserById(userId).getName(), findUserById(friendId).getName());
-        return findUserById(userId);
+        user.setFriends(getUserFriends(userId).stream()
+                .map(User::getId)
+                .collect(Collectors.toSet()));
+        log.info("Пользователи {} и {} перестали дружить.", user.getName(), friend.getName());
+        return user;
     }
 
     public List<User> getUserFriends(Integer id) {
+        userStorage.findUserById(id);
         log.info("Список друзей пользователя с id {}", id);
         return friendStorage.getUserFriends(id);
     }
 
     public List<User> getCommonFriends(Integer userId, Integer user2Id) {
+        userStorage.findUserById(userId);
+        userStorage.findUserById(user2Id);
         log.info("Список общих друзей пользователей {} и {}", userId, user2Id);
         return friendStorage.getCommonFriends(userId, user2Id);
     }

@@ -5,9 +5,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.dao.mapper.FilmMapper;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.LikeStorage;
-import ru.yandex.practicum.filmorate.storage.film.MpaStorage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -20,7 +20,7 @@ import java.util.Set;
 @Slf4j
 public class LikeDbStorage implements LikeStorage {
     private final JdbcTemplate jdbcTemplate;
-    private final MpaStorage mpaStorage;
+    private final FilmMapper filmMapper;
 
     @Override
     public void like(Integer filmId, Integer userId) {
@@ -36,10 +36,10 @@ public class LikeDbStorage implements LikeStorage {
 
     @Override
     public List<Film> getPopularFilms(Integer count) {
-        String sqlQuery = "SELECT f.* from FILMS f " +
+        String sqlQuery = "SELECT f.*,m.NAME as MPA_name from FILMS f " +
                 "join MPA M on M.MPA_RATING_ID = f.MPA_RATING_ID" +
                 " join LIKES l on f.FILM_ID = l.FILM_ID group by f.FILM_ID order by count(l.USER_ID) desc limit ?";
-        return jdbcTemplate.query(sqlQuery, this::mapRowToFilm, count);
+        return jdbcTemplate.query(sqlQuery, filmMapper, count);
     }
 
     @Override
@@ -53,7 +53,7 @@ public class LikeDbStorage implements LikeStorage {
         return likes;
     }
 
-    private Film mapRowToFilm(ResultSet resultSet, int rowNum) throws SQLException {
+ /*   private Film mapRowToFilm(ResultSet resultSet, int rowNum) throws SQLException {
         return Film.builder()
                 .id(resultSet.getInt("film_id"))
                 .name(resultSet.getString("name"))
@@ -62,5 +62,5 @@ public class LikeDbStorage implements LikeStorage {
                 .duration(resultSet.getInt("duration"))
                 .mpa(mpaStorage.getMpaById(resultSet.getInt("mpa_rating_id")))
                 .build();
-    }
+    } */
 }
