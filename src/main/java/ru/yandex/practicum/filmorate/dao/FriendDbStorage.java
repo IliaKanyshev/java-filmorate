@@ -16,6 +16,7 @@ import java.util.List;
 public class FriendDbStorage implements FriendStorage {
     private final JdbcTemplate jdbcTemplate;
     private final UserMapper userMapper;
+
     @Override
     public void addFriend(Integer userId, Integer friendId) {
         jdbcTemplate.update("MERGE INTO friends(USER_ID, FRIEND_ID) VALUES(?, ?)", userId, friendId);
