@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.service.film;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -17,7 +16,6 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class FilmService {
-    private final JdbcTemplate jdbcTemplate;
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
     private final LikeStorage likeStorage;
@@ -36,14 +34,13 @@ public class FilmService {
         if (film.getMpa().getId() > 5) {
             throw new ValidationException("Неверный mpa_id.");
         }
-        return filmStorage.createFilm(film);
+        Film film1 = filmStorage.createFilm(film);
+        genreStorage.updateFilmGenres(film1);
+        return film1;
     }
 
     public Film updateFilm(Film film) {
-        if (!getFilm(film.getId()).getGenres().isEmpty()) {
-            String sqlQuery = "DELETE from GENRE where FILM_ID = ?";
-            jdbcTemplate.update(sqlQuery, film.getId());
-        }
+        genreStorage.updateFilmGenres(film);
         filmStorage.updateFilm(film);
         film.setGenres(genreStorage.getGenreListById(film.getId()));
         film.setLikes(likeStorage.getLikesById(film.getId()));

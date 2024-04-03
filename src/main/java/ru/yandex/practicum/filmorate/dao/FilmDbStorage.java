@@ -10,7 +10,6 @@ import ru.yandex.practicum.filmorate.dao.mapper.FilmMapper;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
 import java.util.HashMap;
@@ -41,7 +40,6 @@ public class FilmDbStorage implements FilmStorage {
                 .usingGeneratedKeyColumns("FILM_ID");
         int key = simpleJdbcInsert.executeAndReturnKey(filmToMap(film)).intValue();
         film.setId(key);
-        addFilmGenres(film);
         log.debug("Добавлен фильм {} с ID {}.", film.getName(), film.getId());
         return film;
     }
@@ -51,7 +49,6 @@ public class FilmDbStorage implements FilmStorage {
         getFilmById(film.getId());
         String sqlQuery = "UPDATE FILMS SET NAME = ?, DESCRIPTION = ?, RELEASE_DATE = ?, DURATION = ?, MPA_RATING_ID = ? WHERE FILM_ID = ?";
         jdbcTemplate.update(sqlQuery, film.getName(), film.getDescription(), film.getReleaseDate(), film.getDuration(), film.getMpa().getId(), film.getId());
-        addFilmGenres(film);
         log.info("Фильм с id {} обновлен.", film.getId());
         return getFilmById(film.getId());
     }
@@ -85,18 +82,6 @@ public class FilmDbStorage implements FilmStorage {
         values.put("mpa_rating_id", film.getMpa().getId());
         values.put("genres", film.getGenres());
         return values;
-    }
-
-    private void addFilmGenres(Film film) {
-        if (film.getGenres() != null) {
-            for (Genre genre : film.getGenres()) {
-                jdbcTemplate.update(
-                        "MERGE INTO GENRE (film_id, genre_id) VALUES (?, ?);",
-                        film.getId(),
-                        genre.getId()
-                );
-            }
-        }
     }
 
     private boolean checkGenreExist(Film film) {
