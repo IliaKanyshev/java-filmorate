@@ -36,7 +36,7 @@ public class LikeDbStorage implements LikeStorage {
     public List<Film> getPopularFilms(Integer count) {
         String sqlQuery = "SELECT f.*,m.NAME as MPA_name from FILMS f " +
                 "join MPA M on M.MPA_RATING_ID = f.MPA_RATING_ID" +
-                " join LIKES l on f.FILM_ID = l.FILM_ID group by f.FILM_ID order by count(l.USER_ID) desc limit ?";
+                " LEFT JOIN LIKES l on f.FILM_ID = l.FILM_ID group by f.FILM_ID order by count(l.USER_ID) desc limit ?";
         return jdbcTemplate.query(sqlQuery, filmMapper, count);
     }
 

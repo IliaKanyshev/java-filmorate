@@ -46,6 +46,7 @@ public class GenreDbStorageTest {
     @Test
     public void getGenreByIdTest() {
         filmDbStorage.createFilm(film);
+        genreDbStorage.updateFilmGenres(film);
         List<Genre> genres = genreDbStorage.getGenreListById(film.getId());
         List<Genre> genres1 = film.getGenres();
         assertThat(genres)
@@ -62,6 +63,7 @@ public class GenreDbStorageTest {
     @Test
     public void getGenreListByIdTest() {
         filmDbStorage.createFilm(film);
+        genreDbStorage.updateFilmGenres(film);
         assertEquals(genreDbStorage.getGenreListById(film.getId()).size(), 1);
     }
 }

@@ -24,8 +24,8 @@ public class FilmService {
     public List<Film> getFilms() {
         List<Film> films = filmStorage.getFilms();
         for (Film film : films) {
-            film.getGenres().addAll(genreStorage.getGenreListById(film.getId()));
-            film.getLikes().addAll(likeStorage.getLikesById(film.getId()));
+            film.setGenres(genreStorage.getGenreListById(film.getId()));
+            film.setLikes(likeStorage.getLikesById(film.getId()));
         }
         return films;
     }
@@ -34,13 +34,17 @@ public class FilmService {
         if (film.getMpa().getId() > 5) {
             throw new ValidationException("Неверный mpa_id.");
         }
-        return filmStorage.createFilm(film);
+        Film film1 = filmStorage.createFilm(film);
+        genreStorage.updateFilmGenres(film1);
+        return film1;
     }
 
     public Film updateFilm(Film film) {
-        film.getGenres().addAll(genreStorage.getGenreListById(film.getId()));
-        film.getLikes().addAll(likeStorage.getLikesById(film.getId()));
-        return filmStorage.updateFilm(film);
+        genreStorage.updateFilmGenres(film);
+        filmStorage.updateFilm(film);
+        film.setGenres(genreStorage.getGenreListById(film.getId()));
+        film.setLikes(likeStorage.getLikesById(film.getId()));
+        return getFilm(film.getId());
     }
 
     public void deleteFilm(Integer id) {
@@ -49,8 +53,8 @@ public class FilmService {
 
     public Film getFilm(Integer id) {
         Film film = filmStorage.getFilmById(id);
-        film.getGenres().addAll(genreStorage.getGenreListById(film.getId()));
-        film.getLikes().addAll(likeStorage.getLikesById(film.getId()));
+        film.setGenres(genreStorage.getGenreListById(id));
+        film.setLikes(likeStorage.getLikesById(id));
         return film;
     }
 
