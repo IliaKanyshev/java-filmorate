@@ -22,12 +22,16 @@ public class LikeDbStorage implements LikeStorage {
 
     @Override
     public void like(Integer filmId, Integer userId) {
+        String sqlAddLike = "UPDATE films SET rate = rate + 1 WHERE film_id = ?";
+        jdbcTemplate.update(sqlAddLike, filmId);
         jdbcTemplate.update("MERGE INTO LIKES (FILM_ID, USER_ID) VALUES(?, ?)", filmId, userId);
         log.info("Пользователь с id {} поставил лайк фильму с id {}", userId, filmId);
     }
 
     @Override
     public void deleteLike(Integer filmId, Integer userId) {
+        String sqlAddLike = "UPDATE films SET rate = rate - 1 WHERE film_id = ?";
+        jdbcTemplate.update(sqlAddLike, filmId);
         jdbcTemplate.update("DELETE from LIKES where FILM_ID = ? and USER_ID = ?", filmId, userId);
         log.info("Пользователь с id {} удалил лайк фильму с id {}", userId, filmId);
     }

@@ -3,8 +3,11 @@ package ru.yandex.practicum.filmorate.service.film;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.controller.DirectorController;
+import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.storage.film.DirectorStorage;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.film.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.film.LikeStorage;
@@ -20,6 +23,7 @@ public class FilmService {
     private final UserStorage userStorage;
     private final LikeStorage likeStorage;
     private final GenreStorage genreStorage;
+    private final DirectorStorage directorStorage;
 
     public List<Film> getFilms() {
         List<Film> films = filmStorage.getFilms();
@@ -40,11 +44,12 @@ public class FilmService {
     }
 
     public Film updateFilm(Film film) {
-        genreStorage.updateFilmGenres(film);
-        filmStorage.updateFilm(film);
+//        genreStorage.updateFilmGenres(film);
+//        filmStorage.updateFilm(film);
         film.setGenres(genreStorage.getGenreListById(film.getId()));
-        film.setLikes(likeStorage.getLikesById(film.getId()));
-        return getFilm(film.getId());
+//        film.setLikes(likeStorage.getLikesById(film.getId()));
+//        return getFilm(film.getId());
+    return filmStorage.updateFilm(film);
     }
 
     public void deleteFilm(Integer id) {
@@ -84,5 +89,15 @@ public class FilmService {
                 }
         );
         return films;
+    }
+    public List<Film> getFilmsByDirector(int id, String sort) {
+        if (directorStorage.getById(id).isEmpty()) {
+            throw new NotFoundException("Нету режиссера с таким id " + id);
+        }
+        if (!sort.equals("likes") && !sort.equals("year")) {
+            throw new NotFoundException("Неправильно передан параметр сортировки");
+        }
+        sort = sort.equals("likes") ? "rate" : "release_date";
+        return filmStorage.getFilmsByDirector(id, sort);
     }
 }

@@ -27,7 +27,8 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public List<Film> getFilms() {
         log.info("Список всех фильмов:");
-        String sqlQuery = "SELECT f.*, m.NAME FROM FILMS f left join MPA m on f.MPA_RATING_ID = m.MPA_RATING_ID";
+        String sqlQuery = "SELECT * FROM films";
+
         return jdbcTemplate.query(sqlQuery, filmMapper);
     }
 
@@ -46,11 +47,16 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Film updateFilm(Film film) {
-        getFilmById(film.getId());
-        String sqlQuery = "UPDATE FILMS SET NAME = ?, DESCRIPTION = ?, RELEASE_DATE = ?, DURATION = ?, MPA_RATING_ID = ? WHERE FILM_ID = ?";
-        jdbcTemplate.update(sqlQuery, film.getName(), film.getDescription(), film.getReleaseDate(), film.getDuration(), film.getMpa().getId(), film.getId());
+//        getFilmById(film.getId());
+        if (film.getDirectors() != null) {
+            jdbcTemplate.update("UPDATE FILMS SET director_id = ? WHERE film_id = ?", film.getDirectors().get(0).getId(), film.getId());
+        }
+        String sqlQuery = "UPDATE FILMS SET NAME = ?, DESCRIPTION = ?, RELEASE_DATE = ?, DURATION = ? WHERE FILM_ID = ?";
+        jdbcTemplate.update(sqlQuery, film.getName(), film.getDescription(), film.getReleaseDate(), film.getDuration(), film.getId());
+
         log.info("Фильм с id {} обновлен.", film.getId());
-        return getFilmById(film.getId());
+//        return getFilmById(film.getId());
+    return film;
     }
 
     @Override
@@ -72,6 +78,11 @@ public class FilmDbStorage implements FilmStorage {
             throw new NotFoundException(String.format("Фильм с id %d не найден.", id));
         }
     }
+    public List<Film> getFilmsByDirector(int id, String sort) {
+        String sql = "SELECT * FROM films WHERE director_id = ? ORDER BY " + sort;
+        List<Film> films = jdbcTemplate.query(sql, filmMapper, id);
+        return films;
+    }
 
     public Map<String, Object> filmToMap(Film film) {
         Map<String, Object> values = new HashMap<>();
@@ -81,6 +92,9 @@ public class FilmDbStorage implements FilmStorage {
         values.put("duration", film.getDuration());
         values.put("mpa_rating_id", film.getMpa().getId());
         values.put("genres", film.getGenres());
+        if (film.getDirectors() != null) {
+            values.put("director_id", film.getDirectors().get(0).getId());
+        }
         return values;
     }
 

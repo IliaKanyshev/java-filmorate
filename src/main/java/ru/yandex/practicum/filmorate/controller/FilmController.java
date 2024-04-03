@@ -21,7 +21,10 @@ import java.util.*;
 public class FilmController {
 
     private final FilmService filmService;
-
+    @GetMapping("/director/{directorId}")
+    public List<Film> getFilmsByDirector (@PathVariable int directorId, @RequestParam String sortBy) {
+        return filmService.getFilmsByDirector(directorId, sortBy);
+    }
     @GetMapping
     public List<Film> getFilms() {
         log.info("Получен запрос списка фильмов.");
