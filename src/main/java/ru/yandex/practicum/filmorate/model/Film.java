@@ -32,8 +32,10 @@ public class Film {
     private LocalDate releaseDate;
     @Positive(message = "Продолжительность фильма должна быть больше 0.")
     private int duration;
-    private final Set<Integer> likes = new HashSet<>();
+    @Builder.Default
+    private Set<Integer> likes = new HashSet<>();
     @NotNull
     private Mpa mpa;
-    private final List<Genre> genres = new ArrayList<>();
+    @Builder.Default
+    private List<Genre> genres = new ArrayList<>();
 }
