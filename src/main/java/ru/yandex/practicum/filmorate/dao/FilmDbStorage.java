@@ -84,17 +84,17 @@ public class FilmDbStorage implements FilmStorage {
     }
     public List<Film> getSortedFilms(int id, String sort) {
         String sqlQueryLikes = "SELECT f.* "
-                + "FROM films f "
-                + "LEFT JOIN DIRECTOR_FILM df ON f.FILM_ID = df.FILM_ID "
-                + "LEFT JOIN likes l ON f.FILM_ID = l.FILM_ID "
+                + "FROM DIRECTOR_FILM df "
+                + "JOIN films f ON f.FILM_ID = df.FILM_ID "
+                + "JOIN likes l ON f.FILM_ID = l.FILM_ID "
                 + "WHERE df.DIRECTOR_ID = ?"
                 + "GROUP BY f.FILM_ID "
                 + "ORDER BY COUNT(l.USER_ID) DESC";
         String sqlQueryYears = "SELECT * "
-                + "FROM films f "
-                + "LEFT JOIN DIRECTOR_FILM df ON f.FILM_ID = df.FILM_ID "
+                + "FROM DIRECTOR_FILM df "
+                + "JOIN films f ON f.FILM_ID = df.FILM_ID "
                 + "WHERE df.DIRECTOR_ID = ?"
-                + "ORDER BY RELEASE_DATE";
+                + "ORDER BY f.RELEASE_DATE";
         List<Film> films;
         if (sort.equals("likes")) {
             films = jdbcTemplate.query(sqlQueryLikes, filmMapper, id);
