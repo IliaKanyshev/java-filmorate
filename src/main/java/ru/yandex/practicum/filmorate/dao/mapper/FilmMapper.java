@@ -3,9 +3,7 @@ package ru.yandex.practicum.filmorate.dao.mapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.film.DirectorStorage;
 import ru.yandex.practicum.filmorate.storage.film.MpaStorage;
 
@@ -15,8 +13,9 @@ import java.sql.SQLException;
 @RequiredArgsConstructor
 @Component
 public class FilmMapper implements RowMapper<Film> {
-private final DirectorStorage directorStorage;
-private final MpaStorage mpaStorage;
+    private final DirectorStorage directorStorage;
+    private final MpaStorage mpaStorage;
+
     @Override
     public Film mapRow(ResultSet resultSet, int rowNum) throws SQLException {
         Film film = Film.builder()
