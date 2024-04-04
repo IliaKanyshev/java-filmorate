@@ -41,7 +41,7 @@ public class MpaDbStorageTest {
 
     @Test
     public void getMpaByIdTest() {
-        filmDbStorage.createFilm(film);
+    //    filmDbStorage.createFilm(film);
         Mpa mpa = mpaStorage.getMpaById(film.getId());
         assertEquals(mpa, film.getMpa());
     }
