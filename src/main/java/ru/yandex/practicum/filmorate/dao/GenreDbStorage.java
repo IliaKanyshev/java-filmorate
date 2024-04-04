@@ -49,6 +49,7 @@ public class GenreDbStorage implements GenreStorage {
         return getGenresList().stream().map(Genre::getId).collect(Collectors.toList());
     }
 
+    @Override
     public void updateFilmGenres(Film film) {
         String sqlQuery = "DELETE from GENRE where FILM_ID = ?";
         jdbcTemplate.update(sqlQuery, film.getId());

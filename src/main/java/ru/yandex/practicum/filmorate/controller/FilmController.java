@@ -10,7 +10,7 @@ import ru.yandex.practicum.filmorate.validators.Marker;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
-import java.util.*;
+import java.util.List;
 
 
 @RestController
@@ -23,6 +23,7 @@ public class FilmController {
     private final FilmService filmService;
     @GetMapping("/director/{directorId}")
     public List<Film> getFilmsByDirector (@PathVariable int directorId, @RequestParam String sortBy) {
+        log.info("Получен запрос на получения отсортированного списка фильмов по лайкам или id.");
         return filmService.getFilmsByDirector(directorId, sortBy);
     }
     @GetMapping
