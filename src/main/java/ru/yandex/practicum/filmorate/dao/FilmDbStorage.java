@@ -47,15 +47,11 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public Film updateFilm(Film film) {
         getFilmById(film.getId());
-      /*  if (film.getDirectors() != null) {
-            jdbcTemplate.update("UPDATE FILMS SET director_id = ? WHERE film_id = ?", film.getDirectors().get(0).getId(), film.getId());
-        } */
         String sqlQuery = "UPDATE FILMS SET NAME = ?, DESCRIPTION = ?, RELEASE_DATE = ?, DURATION = ?, mpa_rating_id = ? WHERE FILM_ID = ?";
         jdbcTemplate.update(sqlQuery, film.getName(), film.getDescription(), film.getReleaseDate(),
                 film.getDuration(), film.getMpa().getId(), film.getId());
         log.info("Фильм с id {} обновлен.", film.getId());
         return getFilmById(film.getId());
-//    return film;
     }
 
     @Override
@@ -78,21 +74,19 @@ public class FilmDbStorage implements FilmStorage {
         }
     }
 
-    public List<Film> getFilmsByDirector(int id, String sort) {
-        String sql = "SELECT f.* from FILMS f left join DIRECTOR_FILM DF on FILMS.FILM_ID = DF.FILM_ID where DIRECTOR_ID = ? ORDER BY " + sort;
-        return jdbcTemplate.query(sql, filmMapper, id);
-    }
     public List<Film> getSortedFilms(int id, String sort) {
-        String sqlQueryLikes = "SELECT f.* "
+        String sqlQueryLikes = "SELECT f.*,MPA.NAME "
                 + "FROM DIRECTOR_FILM df "
-                + "JOIN films f ON f.FILM_ID = df.FILM_ID "
-                + "JOIN likes l ON f.FILM_ID = l.FILM_ID "
+                + "LEFT JOIN films f ON f.FILM_ID = df.FILM_ID "
+                + "LEFT JOIN likes l ON f.FILM_ID = l.FILM_ID "
+                + "LEFT JOIN MPA MPA on MPA.MPA_RATING_ID = f.MPA_RATING_ID "
                 + "WHERE df.DIRECTOR_ID = ?"
                 + "GROUP BY f.FILM_ID "
                 + "ORDER BY COUNT(l.USER_ID) DESC";
-        String sqlQueryYears = "SELECT * "
+        String sqlQueryYears = "SELECT f.*, MPA.NAME "
                 + "FROM DIRECTOR_FILM df "
-                + "JOIN films f ON f.FILM_ID = df.FILM_ID "
+                + "LEFT JOIN films f ON f.FILM_ID = df.FILM_ID "
+                + "LEFT JOIN MPA MPA on MPA.MPA_RATING_ID = f.MPA_RATING_ID "
                 + "WHERE df.DIRECTOR_ID = ?"
                 + "ORDER BY f.RELEASE_DATE";
         List<Film> films;
@@ -103,6 +97,7 @@ public class FilmDbStorage implements FilmStorage {
         } else {
             throw new NotFoundException("Некорректный запрос");
         }
+        log.info("Список отсортированных фильмов:");
         return films;
     }
 
@@ -115,9 +110,6 @@ public class FilmDbStorage implements FilmStorage {
         values.put("mpa_rating_id", film.getMpa().getId());
         values.put("genres", film.getGenres());
         values.put("directors", film.getDirectors());
-        /* if (film.getDirectors() != null) {
-            values.put("director_id", film.getDirectors().get(0).getId());
-        } */
         return values;
     }
 

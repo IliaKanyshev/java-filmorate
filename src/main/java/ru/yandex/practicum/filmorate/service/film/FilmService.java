@@ -48,12 +48,9 @@ public class FilmService {
         directorStorage.updateFilmDirector(film);
         genreStorage.updateFilmGenres(film);
         filmStorage.updateFilm(film);
-        //    filmStorage.getFilmById(film.getId());
         film.setGenres(genreStorage.getGenreListById(film.getId()));
         film.setDirectors(directorStorage.getDirectorsListById(film.getId()));
-//        film.setLikes(likeStorage.getLikesById(film.getId()));
         return getFilm(film.getId());
-        //  return filmStorage.updateFilm(film);
     }
 
     public void deleteFilm(Integer id) {
@@ -103,7 +100,11 @@ public class FilmService {
         if (!sort.equals("likes") && !sort.equals("year")) {
             throw new NotFoundException("Неправильно передан параметр сортировки");
         }
-      //  sort = sort.equals("likes") ? "rate" : "release_date";
-        return filmStorage.getSortedFilms(id, sort);
+        List<Film> films = filmStorage.getSortedFilms(id, sort);
+        films.forEach(film -> {
+            film.setDirectors(directorStorage.getDirectorsListById(film.getId()));
+            film.setGenres(genreStorage.getGenreListById(film.getId()));
+        });
+        return films;
     }
 }

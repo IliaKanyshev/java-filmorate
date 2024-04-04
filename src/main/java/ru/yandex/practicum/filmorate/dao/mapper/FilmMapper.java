@@ -12,8 +12,7 @@ import java.sql.SQLException;
 @RequiredArgsConstructor
 @Component
 public class FilmMapper implements RowMapper<Film> {
-/*private final DirectorStorage directorStorage;
-private final MpaStorage mpaStorage; */
+
     @Override
     public Film mapRow(ResultSet resultSet, int rowNum) throws SQLException {
         Film film = Film.builder()
@@ -24,14 +23,6 @@ private final MpaStorage mpaStorage; */
                 .duration(resultSet.getInt("duration"))
                 .mpa(new Mpa(resultSet.getInt("mpa_rating_id"), resultSet.getString("MPA.name")))
                 .build();
-     /*   Integer mpaId = (Integer) resultSet.getObject("mpa_rating_id");
-        if (mpaId != null) {
-            film.setMpa(mpaStorage.getMpaById(mpaId));
-        }
-        Integer directorId = (Integer) resultSet.getObject("director_id");
-        if (directorId != null) {
-            film.getDirectors().add(directorStorage.getById(directorId).get());
-        } */
         return film;
     }
 }
