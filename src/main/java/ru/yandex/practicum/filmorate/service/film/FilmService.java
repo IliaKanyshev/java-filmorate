@@ -3,8 +3,10 @@ package ru.yandex.practicum.filmorate.service.film;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.storage.film.DirectorStorage;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.film.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.film.LikeStorage;
@@ -20,12 +22,14 @@ public class FilmService {
     private final UserStorage userStorage;
     private final LikeStorage likeStorage;
     private final GenreStorage genreStorage;
+    private final DirectorStorage directorStorage;
 
     public List<Film> getFilms() {
         List<Film> films = filmStorage.getFilms();
         for (Film film : films) {
             film.setGenres(genreStorage.getGenreListById(film.getId()));
             film.setLikes(likeStorage.getLikesById(film.getId()));
+            film.setDirectors(directorStorage.getDirectorsListById(film.getId()));
         }
         return films;
     }
@@ -36,14 +40,16 @@ public class FilmService {
         }
         Film film1 = filmStorage.createFilm(film);
         genreStorage.updateFilmGenres(film1);
+        directorStorage.updateFilmDirector(film1);
         return film1;
     }
 
     public Film updateFilm(Film film) {
+        directorStorage.updateFilmDirector(film);
         genreStorage.updateFilmGenres(film);
         filmStorage.updateFilm(film);
         film.setGenres(genreStorage.getGenreListById(film.getId()));
-        film.setLikes(likeStorage.getLikesById(film.getId()));
+        film.setDirectors(directorStorage.getDirectorsListById(film.getId()));
         return getFilm(film.getId());
     }
 
@@ -55,6 +61,7 @@ public class FilmService {
         Film film = filmStorage.getFilmById(id);
         film.setGenres(genreStorage.getGenreListById(id));
         film.setLikes(likeStorage.getLikesById(id));
+        film.setDirectors(directorStorage.getDirectorsListById(id));
         return film;
     }
 
@@ -83,6 +90,21 @@ public class FilmService {
                     film.getGenres().addAll(genreStorage.getGenreListById(film.getId()));
                 }
         );
+        return films;
+    }
+
+    public List<Film> getFilmsByDirector(int id, String sort) {
+        if (directorStorage.getById(id).isEmpty()) {
+            throw new NotFoundException("Нету режиссера с таким id " + id);
+        }
+        if (!sort.equals("likes") && !sort.equals("year")) {
+            throw new NotFoundException("Неправильно передан параметр сортировки");
+        }
+        List<Film> films = filmStorage.getSortedFilms(id, sort);
+        films.forEach(film -> {
+            film.setDirectors(directorStorage.getDirectorsListById(film.getId()));
+            film.setGenres(genreStorage.getGenreListById(film.getId()));
+        });
         return films;
     }
 }

@@ -47,8 +47,9 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public Film updateFilm(Film film) {
         getFilmById(film.getId());
-        String sqlQuery = "UPDATE FILMS SET NAME = ?, DESCRIPTION = ?, RELEASE_DATE = ?, DURATION = ?, MPA_RATING_ID = ? WHERE FILM_ID = ?";
-        jdbcTemplate.update(sqlQuery, film.getName(), film.getDescription(), film.getReleaseDate(), film.getDuration(), film.getMpa().getId(), film.getId());
+        String sqlQuery = "UPDATE FILMS SET NAME = ?, DESCRIPTION = ?, RELEASE_DATE = ?, DURATION = ?, mpa_rating_id = ? WHERE FILM_ID = ?";
+        jdbcTemplate.update(sqlQuery, film.getName(), film.getDescription(), film.getReleaseDate(),
+                film.getDuration(), film.getMpa().getId(), film.getId());
         log.info("Фильм с id {} обновлен.", film.getId());
         return getFilmById(film.getId());
     }
@@ -73,6 +74,33 @@ public class FilmDbStorage implements FilmStorage {
         }
     }
 
+    public List<Film> getSortedFilms(int id, String sort) {
+        String sqlQueryLikes = "SELECT f.*,MPA.NAME "
+                + "FROM DIRECTOR_FILM df "
+                + "LEFT JOIN films f ON f.FILM_ID = df.FILM_ID "
+                + "LEFT JOIN likes l ON f.FILM_ID = l.FILM_ID "
+                + "LEFT JOIN MPA MPA on MPA.MPA_RATING_ID = f.MPA_RATING_ID "
+                + "WHERE df.DIRECTOR_ID = ?"
+                + "GROUP BY f.FILM_ID "
+                + "ORDER BY COUNT(l.USER_ID) DESC";
+        String sqlQueryYears = "SELECT f.*, MPA.NAME "
+                + "FROM DIRECTOR_FILM df "
+                + "LEFT JOIN films f ON f.FILM_ID = df.FILM_ID "
+                + "LEFT JOIN MPA MPA on MPA.MPA_RATING_ID = f.MPA_RATING_ID "
+                + "WHERE df.DIRECTOR_ID = ?"
+                + "ORDER BY f.RELEASE_DATE";
+        List<Film> films;
+        if (sort.equals("likes")) {
+            films = jdbcTemplate.query(sqlQueryLikes, filmMapper, id);
+        } else if (sort.equals("year")) {
+            films = jdbcTemplate.query(sqlQueryYears, filmMapper, id);
+        } else {
+            throw new NotFoundException("Некорректный запрос");
+        }
+        log.info("Список отсортированных фильмов:");
+        return films;
+    }
+
     public Map<String, Object> filmToMap(Film film) {
         Map<String, Object> values = new HashMap<>();
         values.put("name", film.getName());
@@ -81,6 +109,7 @@ public class FilmDbStorage implements FilmStorage {
         values.put("duration", film.getDuration());
         values.put("mpa_rating_id", film.getMpa().getId());
         values.put("genres", film.getGenres());
+        values.put("directors", film.getDirectors());
         return values;
     }
 
