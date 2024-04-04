@@ -46,6 +46,7 @@ public class FilmService {
     public Film updateFilm(Film film) {
 //        genreStorage.updateFilmGenres(film);
 //        filmStorage.updateFilm(film);
+        filmStorage.getFilmById(film.getId());
         film.setGenres(genreStorage.getGenreListById(film.getId()));
 //        film.setLikes(likeStorage.getLikesById(film.getId()));
 //        return getFilm(film.getId());
