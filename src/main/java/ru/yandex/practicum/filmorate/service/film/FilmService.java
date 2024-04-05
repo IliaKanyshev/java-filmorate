@@ -107,4 +107,7 @@ public class FilmService {
         });
         return films;
     }
+    public List<Film> getPopularFilmsByGenreAndYear(Integer count, Integer genreId, Integer year) {
+        return filmStorage.getPopularFilmsByGenreAndYear(count, genreId, year);
+    }
 }
