@@ -37,7 +37,8 @@ public class FilmDbStorage implements FilmStorage {
         if (checkGenreExist(film)) {
             throw new ValidationException("Ошибка genre_id.");
         }
-        SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate).withTableName("FILMS")
+        SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
+                .withTableName("FILMS")
                 .usingGeneratedKeyColumns("FILM_ID");
         int key = simpleJdbcInsert.executeAndReturnKey(filmToMap(film)).intValue();
         film.setId(key);
