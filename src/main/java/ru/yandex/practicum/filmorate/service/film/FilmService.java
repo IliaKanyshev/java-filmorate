@@ -12,6 +12,7 @@ import ru.yandex.practicum.filmorate.storage.film.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.film.LikeStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -108,6 +109,12 @@ public class FilmService {
         return films;
     }
     public List<Film> getPopularFilmsByGenreAndYear(Integer count, Integer genreId, Integer year) {
-        return filmStorage.getPopularFilmsByGenreAndYear(count, genreId, year);
+        List<Film> films = filmStorage.getPopularFilmsByGenreAndYear(count, genreId, year);
+        for (Film film : films) {
+            film.setGenres(genreStorage.getGenreListById(film.getId()));
+            film.setLikes(likeStorage.getLikesById(film.getId()));
+            film.setDirectors(directorStorage.getDirectorsListById(film.getId()));
+        }
+        return films;
     }
 }
