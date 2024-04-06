@@ -101,6 +101,16 @@ public class FilmDbStorage implements FilmStorage {
         return films;
     }
 
+    @Override
+    public List<Film> getCommonFilms(int userId, int friendId) {
+        log.info("Получение общих фильмов у пользователей с ID {} и {}", userId, friendId);
+        String sql = "SELECT f.*, mpa.name FROM films f " +
+                "JOIN likes l1 ON f.film_id = l1.film_id AND l1.user_id = ? " +
+                "JOIN likes l2 ON f.film_id = l2.film_id AND l2.user_id = ? " +
+                "LEFT JOIN mpa mpa ON mpa.mpa_rating_id = f.mpa_rating_id";
+        return jdbcTemplate.query(sql, filmMapper, userId, friendId);
+    }
+
     public Map<String, Object> filmToMap(Film film) {
         Map<String, Object> values = new HashMap<>();
         values.put("name", film.getName());
