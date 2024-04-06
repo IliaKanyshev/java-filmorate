@@ -11,7 +11,6 @@ import ru.yandex.practicum.filmorate.validators.Marker;
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 import java.util.List;
-import java.util.Objects;
 
 
 @RestController
@@ -74,11 +73,11 @@ public class FilmController {
 
     @GetMapping("/popular")
     public List<Film> getPopularFilms(
-            @RequestParam(name = "count",defaultValue = "10", required = false) Integer count,
-            @RequestParam(name = "genreId",defaultValue = "0", required = false) Integer genreId,
-            @RequestParam(name = "year",defaultValue = "0", required = false) Integer year) {
-            if (genreId!=0||year!=0){
-           return filmService.getPopularFilmsByGenreAndYear(count, genreId, year);
+            @RequestParam(name = "count", defaultValue = "10", required = false) Integer count,
+            @RequestParam(name = "genreId", defaultValue = "0", required = false) Integer genreId,
+            @RequestParam(name = "year", defaultValue = "0", required = false) Integer year) {
+        if (genreId != 0 || year != 0) {
+            return filmService.getPopularFilmsByGenreAndYear(count, genreId, year);
         }
         log.info("Получен запрос на получение списка популярных фильмов.");
         return filmService.getPopularFilms(count);

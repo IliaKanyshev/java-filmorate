@@ -12,7 +12,6 @@ import ru.yandex.practicum.filmorate.storage.film.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.film.LikeStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -108,6 +107,7 @@ public class FilmService {
         });
         return films;
     }
+
     public List<Film> getPopularFilmsByGenreAndYear(Integer count, Integer genreId, Integer year) {
         List<Film> films = filmStorage.getPopularFilmsByGenreAndYear(count, genreId, year);
         for (Film film : films) {
