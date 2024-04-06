@@ -12,6 +12,7 @@ import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -129,4 +130,26 @@ public class FilmDbStorage implements FilmStorage {
         }
         return film.getGenres().stream().anyMatch(genre -> genre.getId() > 6);
     }
+
+    @Override
+    public List<Film> getPopularFilmsByGenreAndYear(Integer count, Integer genreId, Integer year) {
+        String sqlQuery =
+                "SELECT F.*, M.mpa_rating_id AS mpa_id, M.name AS mpa_name " +
+                        "FROM films F " +
+                        "LEFT JOIN likes L ON F.film_id = L.film_id " +
+                        "LEFT JOIN mpa AS M ON F.mpa_rating_id = M.mpa_rating_id " +
+                        "LEFT JOIN genre G on F.film_id = G.film_id %s" +
+                        "GROUP BY F.name, F.film_id ORDER BY COUNT(l.film_id) DESC LIMIT ?";
+
+        final List<String> params = new ArrayList<>();
+        if (genreId != 0) {
+            params.add(String.format("genre_id = %s", genreId));
+        }
+        if (year != 0) {
+            params.add(String.format("YEAR(release_date) = %s", year));
+        }
+        final String genreAndYearParams = !params.isEmpty() ? "where ".concat(String.join(" and ", params)) : "";
+        return jdbcTemplate.query(String.format(sqlQuery, genreAndYearParams), filmMapper, count);
+    }
 }
+
