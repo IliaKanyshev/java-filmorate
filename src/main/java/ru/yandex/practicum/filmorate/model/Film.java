@@ -40,5 +40,4 @@ public class Film {
     private List<Genre> genres = new ArrayList<>();
     @Builder.Default
     private List<Director> directors = new ArrayList<>();
-    private long rate;
 }
