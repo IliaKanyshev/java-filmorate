@@ -9,6 +9,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.*;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -112,31 +113,19 @@ public class FilmService {
     }
 
     public List<Film> getFilmsByTitleOrDirector(String query, List<String> by) {
-        List<Film> films;
+        List<Film> films = new ArrayList<>();
         if (by.contains("director") && by.size() == 1) {
             films = filmSearch.getFilmListByDirector(query);
-            for (Film film : films) {
-                film.setGenres(genreStorage.getGenreListById(film.getId()));
-                film.setLikes(likeStorage.getLikesById(film.getId()));
-                film.setDirectors(directorStorage.getDirectorsListById(film.getId()));
-                return films;
-            }
         } else if (by.contains("title") && by.size() == 1) {
             films = filmSearch.getFilmListByTitle(query);
-            for (Film film : films) {
-                film.setGenres(genreStorage.getGenreListById(film.getId()));
-                film.setLikes(likeStorage.getLikesById(film.getId()));
-                film.setDirectors(directorStorage.getDirectorsListById(film.getId()));
-                return films;
-            }
         } else if (by.contains("director") && by.contains("title") && by.size() == 2) {
             films = filmSearch.getFilmListByTitleAndDirector(query);
-            for (Film film : films) {
-                film.setGenres(genreStorage.getGenreListById(film.getId()));
-                film.setLikes(likeStorage.getLikesById(film.getId()));
-                film.setDirectors(directorStorage.getDirectorsListById(film.getId()));
-                return films;
-            }
+        }
+        for (Film film : films) {
+            film.setGenres(genreStorage.getGenreListById(film.getId()));
+            film.setLikes(likeStorage.getLikesById(film.getId()));
+            film.setDirectors(directorStorage.getDirectorsListById(film.getId()));
+            return films;
         }
         return Collections.emptyList();
     }
