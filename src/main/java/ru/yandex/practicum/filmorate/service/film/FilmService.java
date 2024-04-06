@@ -108,6 +108,17 @@ public class FilmService {
         return films;
     }
 
+    public List<Film> getCommonFilms(int userId, int friendId) {
+        userStorage.findUserById(userId);
+        userStorage.findUserById(friendId);
+        List<Film> commonFilms = filmStorage.getCommonFilms(userId, friendId);
+        commonFilms.forEach(film -> {
+            film.setDirectors(directorStorage.getDirectorsListById(film.getId()));
+            film.setGenres(genreStorage.getGenreListById(film.getId()));
+        });
+        return commonFilms;
+    }
+
     public List<Film> getPopularFilmsByGenreAndYear(Integer count, Integer genreId, Integer year) {
         List<Film> films = filmStorage.getPopularFilmsByGenreAndYear(count, genreId, year);
         for (Film film : films) {
