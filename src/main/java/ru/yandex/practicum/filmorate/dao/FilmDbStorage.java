@@ -123,12 +123,12 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public List<Film> getPopularFilmsByGenreAndYear(Integer count, Integer genreId, Integer year) {
         String sqlQuery =
-                 "select f.*, m.mpa_rating_id as mpa_id, m.name as mpa_name " +
-                "from films f "+
-                "left join likes l on f.film_id = l.film_id " +
-                "LEFT JOIN mpa AS m ON f.mpa_rating_id = m.mpa_rating_id " +
-                "left join genre g on f.film_id = g.film_id %s"+
-                "group by f.name, f.film_id order by count(l.film_id) desc limit ?";
+                "SELECT F.*, M.mpa_rating_id AS mpa_id, M.name AS mpa_name " +
+                "FROM films F "+
+                "LEFT JOIN likes L ON F.film_id = L.film_id " +
+                "LEFT JOIN mpa AS M ON F.mpa_rating_id = M.mpa_rating_id " +
+                "LEFT JOIN genre G on F.film_id = G.film_id %s"+
+                "GROUP BY F.name, F.film_id ORDER BY COUNT(l.film_id) DESC LIMIT ?";
 
         final List<String> params = new ArrayList<>();
         if (genreId!=0) {
