@@ -134,13 +134,10 @@ public class FilmDbStorage implements FilmStorage {
                         "L1.USER_ID != ? AND " +
                         "L2.USER_ID = ? " +
                         "ORDER BY COUNT(L1.USER_ID) DESC " +
-                        "LIMIT 3 " +
-                        ") " +
+                        "LIMIT 3 ) " +
                         "AND FILM_ID NOT IN (" +
                         "SELECT FILM_ID FROM LIKES " +
-                        "WHERE USER_ID = ?" +
-                        ")" +
-                        ")";
+                        "WHERE USER_ID = ?))";
 
         return jdbcTemplate.query(sql, filmMapper, userId, userId, userId);
     }
