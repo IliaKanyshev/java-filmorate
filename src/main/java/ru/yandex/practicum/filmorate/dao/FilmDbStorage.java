@@ -130,6 +130,7 @@ public class FilmDbStorage implements FilmStorage {
         }
         return film.getGenres().stream().anyMatch(genre -> genre.getId() > 6);
     }
+
     @Override
     public List<Film> getRecommendations(Integer userId) {
         String sql =
@@ -152,8 +153,6 @@ public class FilmDbStorage implements FilmStorage {
 
         return jdbcTemplate.query(sql, filmMapper, userId, userId, userId);
     }
-    }
-
 
     @Override
     public List<Film> getPopularFilmsByGenreAndYear(Integer count, Integer genreId, Integer year) {

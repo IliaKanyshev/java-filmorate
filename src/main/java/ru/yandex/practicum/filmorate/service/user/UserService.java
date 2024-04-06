@@ -5,7 +5,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.service.film.FilmService;
+import ru.yandex.practicum.filmorate.storage.film.DirectorStorage;
+import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.film.GenreStorage;
+import ru.yandex.practicum.filmorate.storage.film.LikeStorage;
 import ru.yandex.practicum.filmorate.storage.user.FriendStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
@@ -18,7 +21,10 @@ import java.util.stream.Collectors;
 public class UserService {
     private final UserStorage userStorage;
     private final FriendStorage friendStorage;
-    private final FilmService filmService;
+    private final FilmStorage filmStorage;
+    private final GenreStorage genreStorage;
+    private final LikeStorage likeStorage;
+    private final DirectorStorage directorStorage;
 
     public List<User> getUsers() {
         return userStorage.getUsers();
@@ -77,8 +83,16 @@ public class UserService {
         log.info("Список общих друзей пользователей {} и {}", userId, user2Id);
         return friendStorage.getCommonFriends(userId, user2Id);
     }
+
     public List<Film> getRecommendations(Integer userId) {
         findUserById(userId);
-        return filmService.getRecommendations(userId);
+        List<Film> films = filmStorage.getRecommendations(userId);
+        for (Film film : films) {
+            film.setGenres(genreStorage.getGenreListById(film.getId()));
+            film.setLikes(likeStorage.getLikesById(film.getId()));
+            film.setDirectors(directorStorage.getDirectorsListById(film.getId()));
+        }
+        log.info("Список рекомендаций пользователя с id {}", userId);
+        return films;
     }
 }

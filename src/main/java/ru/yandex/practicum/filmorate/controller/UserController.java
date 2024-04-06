@@ -11,7 +11,7 @@ import ru.yandex.practicum.filmorate.validators.Marker;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import java.util.*;
+import java.util.List;
 
 
 @RestController
@@ -77,8 +77,10 @@ public class UserController {
         log.info("Получен запрос на получение списка общих друзей пользователей с id {} и {}", id, otherId);
         return userService.getCommonFriends(id, otherId);
     }
+
     @GetMapping("/{userId}/recommendations")
     public List<Film> getRecommendations(@NotNull @PathVariable Integer userId) {
+        log.info("Получен запрос списка рекомендаций пользователя с id {}", userId);
         return userService.getRecommendations(userId);
     }
 
