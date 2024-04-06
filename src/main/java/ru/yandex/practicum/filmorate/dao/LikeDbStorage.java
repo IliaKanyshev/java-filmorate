@@ -7,6 +7,7 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.dao.mapper.FilmMapper;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.OperationLog;
 import ru.yandex.practicum.filmorate.storage.film.LikeStorage;
 
 import java.util.HashSet;
@@ -20,7 +21,7 @@ public class LikeDbStorage implements LikeStorage {
     private final JdbcTemplate jdbcTemplate;
     private final FilmMapper filmMapper;
 
-    @Override
+    @Override @OperationLog(operation = "ADD", eventType = "LIKE")
     public void like(Integer filmId, Integer userId) {
         String sqlAddLike = "UPDATE films SET rate = rate + 1 WHERE film_id = ?";
         jdbcTemplate.update(sqlAddLike, filmId);
@@ -28,7 +29,7 @@ public class LikeDbStorage implements LikeStorage {
         log.info("Пользователь с id {} поставил лайк фильму с id {}", userId, filmId);
     }
 
-    @Override
+    @Override @OperationLog(operation = "DELETE", eventType = "LIKE")
     public void deleteLike(Integer filmId, Integer userId) {
         String sqlAddLike = "UPDATE films SET rate = rate - 1 WHERE film_id = ?";
         jdbcTemplate.update(sqlAddLike, filmId);
