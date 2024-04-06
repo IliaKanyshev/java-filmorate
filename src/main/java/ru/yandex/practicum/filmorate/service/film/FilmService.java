@@ -107,4 +107,13 @@ public class FilmService {
         });
         return films;
     }
+    public List<Film> getRecommendations(Integer userId) {
+        List<Film> films = filmStorage.getRecommendations(userId);
+        for (Film film : films) {
+            film.setGenres(genreStorage.getGenreListById(film.getId()));
+            film.setLikes(likeStorage.getLikesById(film.getId()));
+            film.setDirectors(directorStorage.getDirectorsListById(film.getId()));
+        }
+        return films;
+    }
 }

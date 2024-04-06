@@ -16,4 +16,6 @@ public interface FilmStorage {
     Film getFilmById(Integer id);
 
     List<Film> getSortedFilms(int id, String sort);
+
+    List<Film> getRecommendations(Integer userId);
 }

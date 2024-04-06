@@ -4,11 +4,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.user.UserService;
 import ru.yandex.practicum.filmorate.validators.Marker;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import java.util.*;
 
 
@@ -74,6 +76,10 @@ public class UserController {
     public List<User> getCommonFriends(@PathVariable Integer id, @PathVariable Integer otherId) {
         log.info("Получен запрос на получение списка общих друзей пользователей с id {} и {}", id, otherId);
         return userService.getCommonFriends(id, otherId);
+    }
+    @GetMapping("/{userId}/recommendations")
+    public List<Film> getRecommendations(@NotNull @PathVariable Integer userId) {
+        return userService.getRecommendations(userId);
     }
 
 }

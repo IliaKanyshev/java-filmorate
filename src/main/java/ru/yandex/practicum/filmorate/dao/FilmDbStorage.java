@@ -119,4 +119,30 @@ public class FilmDbStorage implements FilmStorage {
         }
         return film.getGenres().stream().anyMatch(genre -> genre.getId() > 6);
     }
-}
+    @Override
+    public List<Film> getRecommendations(Integer userId) {
+        String sql =
+                "SELECT * FROM FILMS F " +
+                        "JOIN MPA M ON F.MPA_RATING_ID = M.MPA_RATING_ID " +
+                        "WHERE F.FILM_ID IN (" +
+                        "SELECT FILM_ID FROM LIKES " +
+                        "WHERE USER_ID IN (" +
+                        "SELECT L1.USER_ID FROM LIKES L1 " +
+                        "RIGHT JOIN LIKES L2 ON L2.FILM_ID = L1.FILM_ID " +
+                        "GROUP BY L1.USER_ID, L2.USER_ID " +
+                        "HAVING L1.USER_ID IS NOT NULL AND " +
+                        "L1.USER_ID != ? AND " +
+                        "L2.USER_ID = ? " +
+                        "ORDER BY COUNT(L1.USER_ID) DESC " +
+                        "LIMIT 3 " +
+                        ") " +
+                        "AND FILM_ID NOT IN (" +
+                        "SELECT FILM_ID FROM LIKES " +
+                        "WHERE USER_ID = ?" +
+                        ")" +
+                        ")";
+
+        return jdbcTemplate.query(sql, filmMapper, userId, userId, userId);
+    }
+    }
+
