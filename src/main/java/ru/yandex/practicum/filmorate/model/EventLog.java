@@ -10,7 +10,6 @@ import lombok.Data;
 @Builder
 @AllArgsConstructor
 public class EventLog {
-    @NotNull
     private int eventId;
     @NotNull
     private int userId;
