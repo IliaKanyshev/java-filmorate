@@ -3,8 +3,10 @@ package ru.yandex.practicum.filmorate.service.user;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.FriendStorage;
+import ru.yandex.practicum.filmorate.storage.user.LogStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.List;
@@ -16,6 +18,7 @@ import java.util.stream.Collectors;
 public class UserService {
     private final UserStorage userStorage;
     private final FriendStorage friendStorage;
+    private final LogStorage logStorage;
 
     public List<User> getUsers() {
         return userStorage.getUsers();
@@ -44,6 +47,7 @@ public class UserService {
         User user = findUserById(userId);
         User friend = findUserById(friendId);
         friendStorage.addFriend(userId, friendId);
+        logStorage.saveLog(userId, friendId, "FRIEND", "ADD");
         user.setFriends(getUserFriends(userId).stream()
                 .map(User::getId)
                 .collect(Collectors.toSet()));
@@ -55,6 +59,7 @@ public class UserService {
         User user = findUserById(userId);
         User friend = findUserById(friendId);
         friendStorage.deleteFriend(userId, friendId);
+        logStorage.saveLog(userId, friendId, "FRIEND", "REMOVE");
         user.setFriends(getUserFriends(userId).stream()
                 .map(User::getId)
                 .collect(Collectors.toSet()));

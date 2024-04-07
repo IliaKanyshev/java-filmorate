@@ -10,6 +10,7 @@ import ru.yandex.practicum.filmorate.storage.film.DirectorStorage;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.film.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.film.LikeStorage;
+import ru.yandex.practicum.filmorate.storage.user.LogStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.List;
@@ -23,6 +24,7 @@ public class FilmService {
     private final LikeStorage likeStorage;
     private final GenreStorage genreStorage;
     private final DirectorStorage directorStorage;
+    private final LogStorage logStorage;
 
     public List<Film> getFilms() {
         List<Film> films = filmStorage.getFilms();
@@ -69,6 +71,7 @@ public class FilmService {
         filmStorage.getFilmById(filmId);
         userStorage.findUserById(userId);
         likeStorage.like(filmId, userId);
+        logStorage.saveLog(userId, filmId, "LIKE", "ADD");
         log.info("Пользователь с id {} поставил лайк фильму {}.", userId, getFilm(filmId).getName());
         return getFilm(filmId);
     }
@@ -77,6 +80,7 @@ public class FilmService {
         filmStorage.getFilmById(filmId);
         userStorage.findUserById(userId);
         likeStorage.deleteLike(filmId, userId);
+        logStorage.saveLog(userId, filmId, "LIKE", "REMOVE");
         log.info("Пользователь с id {} удалил лайк у фильма с id {}.", userId, filmId);
         return getFilm(filmId);
     }
