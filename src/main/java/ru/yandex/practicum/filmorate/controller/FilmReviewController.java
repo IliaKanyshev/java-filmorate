@@ -15,7 +15,7 @@ import java.util.Collection;
 @RestController
 @RequestMapping("/reviews")
 @Slf4j
-@Validated
+//@Validated
 @RequiredArgsConstructor
 public class FilmReviewController {
 
@@ -48,8 +48,8 @@ public class FilmReviewController {
 
     @GetMapping
     public Collection<Review> getAllFilmsReviews(
-            @RequestParam(name = "filmId", required = false) Integer filmId,
-            @RequestParam(name = "count", defaultValue = "10", required = false) Integer count
+            @RequestParam(value = "filmId", required = false) Integer filmId,
+            @RequestParam(value = "count", defaultValue = "10", required = false) Integer count
     ) {
         log.info("Получен запрос на получение отзывов для фильма(-ов).");
         return filmReviewService.getAllFilmsReviews(filmId, count);
@@ -57,16 +57,17 @@ public class FilmReviewController {
 
 
     @PutMapping("/{id}/like/{userId}")
-    public Review setLike(@PathVariable("id") Integer reviewId, @PathVariable("userId") Integer userId) {
-        log.info("PUT request to set like from user_id={} for review_id={}.", userId, reviewId);
-        Review review = filmReviewService.setLikeForFilmReview(reviewId, userId);
-        log.info("Like from user_id={} for review_id={} were set", userId, reviewId);
+    public Review setLike(@PathVariable Integer id,
+                          @PathVariable Integer userId) {
+        log.info("PUT request to set like from user_id={} for review_id={}.", userId, id);
+        Review review = filmReviewService.setLikeForFilmReview(id, userId);
+        log.info("Like from user_id={} for review_id={} were set", userId, id);
         return review;
     }
 
     @PutMapping("/{id}/dislike/{userId}")
     public Review setDislike(
-            @PathVariable("id") Integer reviewId,
+            @PathVariable(value = "id") Integer reviewId,
             @PathVariable("userId") Integer userId) {
         log.info("PUT request to set dislike from user_id={} for review_id={}.", userId, reviewId);
         Review review = filmReviewService.setDislikeForFilmReview(reviewId, userId);

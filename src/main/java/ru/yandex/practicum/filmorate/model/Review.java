@@ -27,5 +27,6 @@ public class Review {
     @NotNull(message = "В отзыве отустствует id фильма.")
     private Integer filmId;
 
-    private Integer useful;
+    @Builder.Default
+    private Integer useful = 0;
 }

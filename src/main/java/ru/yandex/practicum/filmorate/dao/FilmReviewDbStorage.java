@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.dao;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
@@ -26,16 +27,10 @@ public class FilmReviewDbStorage implements FilmReviewStorage {
             .isPositive(rs.getBoolean("IS_POSITIVE"))
             .userId(rs.getInt("USER_ID"))
             .filmId(rs.getInt("FILM_ID"))
-            .useful(rs.getInt("USEFUL_VALUE"))
+            .useful(rs.getInt("USEFUL"))
             .build();
 
-    private final String SQL_GET_ALL_REVIEWS =
-            "select fr.ID, fr.CONTENT, fr.IS_POSITIVE, fr.USER_ID, fr.FILM_ID,\n" +
-                    "    sum(coalesce(rr.REACTION_VALUE, 0)) as USEFUL_VALUE\n" +
-                    "     from FILM_REVIEW fr\n" +
-                    "     left join REVIEW_REACTION RR on fr.ID = RR.REVIEW_ID\n" +
-                    "    group by fr.id, fr.CONTENT, fr.IS_POSITIVE, fr.USER_ID, fr.FILM_ID\n" +
-                    "    order by sum(coalesce(rr.REACTION_VALUE, 0)) desc";
+    private final String SQL_GET_ALL_REVIEWS = "select * from FILM_REVIEW order by USEFUL desc";
 
     @Override
     public List<Review> getAllReviews() {
@@ -59,14 +54,20 @@ public class FilmReviewDbStorage implements FilmReviewStorage {
         parameters.put("IS_POSITIVE", review.getIsPositive());
         parameters.put("USER_ID", review.getUserId());
         parameters.put("FILM_ID", review.getFilmId());
+        parameters.put("USEFUL",review.getUseful());
         return parameters;
     }
 
     @Override
     public Optional<Review> updateReview(Review review) {
         int updated = jdbcTemplate.update(
-                "UPDATE FILM_REVIEW set CONTENT =?, IS_POSITIVE =?, USER_ID=?, FILM_ID = ? where ID = ?",
-                review.getContent(), review.getIsPositive(), review.getUserId(), review.getFilmId(),review.getReviewId());
+                "UPDATE FILM_REVIEW set CONTENT =?, IS_POSITIVE =?, USER_ID=?, FILM_ID = ?, USEFUL = ? where ID = ?",
+                review.getContent(),
+                review.getIsPositive(),
+                review.getUserId(),
+                review.getFilmId(),
+                review.getUseful(),
+                review.getReviewId());
         return updated == 1 ? Optional.of(review) : Optional.empty();
     }
 
@@ -79,15 +80,13 @@ public class FilmReviewDbStorage implements FilmReviewStorage {
 
     @Override
     public Optional<Review> getReviewById(Integer reviewId) {
-        final String SQL_GET_REVIEW =
-                "select fr.*, \n" +
-                        "(select coalesce(sum(rr.REACTION_VALUE), 0)\n" +
-                        "  from REVIEW_REACTION rr\n" +
-                        " where rr.REVIEW_ID = fr.id) as USEFUL_VALUE\n" +
-                        "  from FILM_REVIEW fr\n" +
-                        " where fr.id = ?";
-        Review review = jdbcTemplate.queryForObject(SQL_GET_REVIEW, reviewRowMapper, reviewId);
-        return Optional.ofNullable(review);
+        final String SQL_GET_REVIEW = "select * from FILM_REVIEW where id = ?";
+        try {
+            Review review = jdbcTemplate.queryForObject(SQL_GET_REVIEW, reviewRowMapper, reviewId);
+            return Optional.ofNullable(review);
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
     }
 
     @Override
@@ -98,28 +97,36 @@ public class FilmReviewDbStorage implements FilmReviewStorage {
     @Override
     public List<Review> getAllFilmReviewsLimited(Integer filmId, Integer count) {
         String SQL_GET_ALL_FILM_REVIEWS =
-                "select fr.id, fr.CONTENT, fr.IS_POSITIVE, fr.USER_ID, fr.FILM_ID,\n" +
-                        " sum(coalesce(rr.REACTION_VALUE, 0)) as USEFUL_VALUE\n" +
-                        "from FILM_REVIEW fr\n" +
-                        "left join REVIEW_REACTION RR on fr.ID = RR.REVIEW_ID\n" +
-                        " where  fr.FILM_ID = ?\n" +
-                        "group by fr.id, fr.CONTENT, fr.IS_POSITIVE, fr.USER_ID, fr.FILM_ID\n" +
-                        "order by sum(coalesce(rr.REACTION_VALUE, 0)) desc";
+                "select * from FILM_REVIEW fr where  fr.FILM_ID = ? order by USEFUL desc";
         return jdbcTemplate.query(SQL_GET_ALL_FILM_REVIEWS + " LIMIT " + count.toString(), reviewRowMapper, filmId);
     }
 
     @Override
     public Optional<Review> setReaction(Integer reviewId, Integer userId, int i) {
-        jdbcTemplate.update(
-                "MERGE INTO REVIEW_REACTION (REVIEW_ID, USER_ID, REACTION_VALUE) VALUES(?, ?, ?)",
-                reviewId,
-                userId);
+
+        int updated = jdbcTemplate.update(
+                "UPDATE FILM_REVIEW set USEFUL = USEFUL + (?) where ID = ?",
+                i, reviewId);
+        if (updated == 1) {
+            jdbcTemplate.update(
+                    "MERGE INTO REVIEW_REACTION (REVIEW_ID, USER_ID, REACTION_VALUE) VALUES(?, ?, ?)",
+                    reviewId,
+                    userId,
+                    i);
+        }
+
         log.info("Добавлена реакция пользователя с user_id={} на отзыв review_id={}", userId, reviewId);
         return getReviewById(reviewId);
     }
 
     @Override
     public Optional<Review> deleteUserReaction(Integer reviewId, Integer userId) {
+        String sql = "select REACTION_VALUE from REVIEW_REACTION where REVIEW_ID = ? and USER_ID = ?";
+        Integer reactionValue = jdbcTemplate.queryForObject(sql, Integer.class, reviewId, userId);
+
+        jdbcTemplate.update(
+                "UPDATE FILM_REVIEW set USEFUL = USEFUL - (?) where ID = ?",
+                reactionValue, reviewId);
         String deleteReviewQuery = "DELETE FROM REVIEW_REACTION WHERE REVIEW_ID = ? and USER_ID = ?";
         jdbcTemplate.update(deleteReviewQuery, reviewId, userId);
         log.info("Реакция пользователя с userId={} на отнзыв с id={} удалена.", userId, reviewId);

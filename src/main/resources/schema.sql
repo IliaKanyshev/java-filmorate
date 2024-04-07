@@ -85,6 +85,7 @@ CREATE TABLE IF NOT EXISTS film_review
     is_positive BOOLEAN,
     user_id     INTEGER references users (user_id) ON DELETE CASCADE,
     film_id     INTEGER references films (film_id) ON DELETE CASCADE,
+    useful      INTEGER,
     constraint unique_review unique (film_id, user_id)
 );
 
