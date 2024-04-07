@@ -80,6 +80,5 @@ create table if not exists events (
     entity_id int,
     event_type varchar,
     operation varchar,
-    event_timestamp bigint,
-    UNIQUE (event_id, user_id)
+    event_timestamp bigint
 );

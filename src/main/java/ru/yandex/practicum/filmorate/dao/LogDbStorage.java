@@ -32,9 +32,9 @@ public class LogDbStorage implements LogStorage {
     }
 
     @Override
-    public List<EventLog> getLogs(int eventId) {
-        String sql = "SELECT * FROM EVENTS e WHERE EVENT_ID =?";
-        return jdbcTemplate.query(sql, this::logMapper, eventId);
+    public List<EventLog> getLogs(int userId) {
+        String sql = "SELECT * FROM EVENTS e WHERE USER_ID =?";
+        return jdbcTemplate.query(sql, this::logMapper, userId);
     }
 
     EventLog logMapper(ResultSet rs, int rn) throws SQLException {
