@@ -21,13 +21,10 @@ public class FilmReviewService {
     private final FilmStorage filmDbStorage;
     private final UserStorage userStorage;
 
-    public Collection<Review> getAllReviews() {
-        return filmReviewStorage.getAllReviews();
-    }
-
     public Review saveReview(Review review) {
         validateReview(review);
-        return filmReviewStorage.saveReview(review);
+        Review reviewSaved = filmReviewStorage.saveReview(review);
+        return reviewSaved;
     }
 
     private void validateReview(Review review) {

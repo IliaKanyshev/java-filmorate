@@ -7,6 +7,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
+import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.storage.film.FilmReviewStorage;
 
@@ -30,7 +31,7 @@ public class FilmReviewDbStorage implements FilmReviewStorage {
             .useful(rs.getInt("USEFUL"))
             .build();
 
-    private final String SQL_GET_ALL_REVIEWS = "select * from FILM_REVIEW order by USEFUL desc";
+    private static final String SQL_GET_ALL_REVIEWS = "select * from FILM_REVIEW order by USEFUL desc";
 
     @Override
     public List<Review> getAllReviews() {
@@ -39,6 +40,15 @@ public class FilmReviewDbStorage implements FilmReviewStorage {
 
     @Override
     public Review saveReview(Review review) {
+        String sql = "select count(*) from FILM_REVIEW where FILM_ID = ? and USER_ID = ?";
+        Integer reviewCount = jdbcTemplate.queryForObject(sql, Integer.class, review.getFilmId(), review.getUserId());
+        if (reviewCount == null) {
+            return null;
+        }
+        if (reviewCount > 0) {
+            throw new ValidationException("Отзыв уже существует");
+        }
+
         SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("FILM_REVIEW")
                 .usingGeneratedKeyColumns("ID");
@@ -54,21 +64,19 @@ public class FilmReviewDbStorage implements FilmReviewStorage {
         parameters.put("IS_POSITIVE", review.getIsPositive());
         parameters.put("USER_ID", review.getUserId());
         parameters.put("FILM_ID", review.getFilmId());
-        parameters.put("USEFUL",review.getUseful());
+        parameters.put("USEFUL", review.getUseful());
         return parameters;
     }
 
     @Override
     public Optional<Review> updateReview(Review review) {
         int updated = jdbcTemplate.update(
-                "UPDATE FILM_REVIEW set CONTENT =?, IS_POSITIVE =?, USER_ID=?, FILM_ID = ?, USEFUL = ? where ID = ?",
+                "UPDATE FILM_REVIEW set CONTENT =?, IS_POSITIVE =? where ID = ?",
                 review.getContent(),
                 review.getIsPositive(),
-                review.getUserId(),
-                review.getFilmId(),
-                review.getUseful(),
                 review.getReviewId());
-        return updated == 1 ? Optional.of(review) : Optional.empty();
+        Review updatedReview = getReviewById(review.getReviewId()).get();
+        return updated == 1 ? Optional.of(updatedReview) : Optional.empty();
     }
 
     @Override
@@ -96,26 +104,29 @@ public class FilmReviewDbStorage implements FilmReviewStorage {
 
     @Override
     public List<Review> getAllFilmReviewsLimited(Integer filmId, Integer count) {
-        String SQL_GET_ALL_FILM_REVIEWS =
-                "select * from FILM_REVIEW fr where  fr.FILM_ID = ? order by USEFUL desc";
-        return jdbcTemplate.query(SQL_GET_ALL_FILM_REVIEWS + " LIMIT " + count.toString(), reviewRowMapper, filmId);
+        String sqlQuery = "select * from FILM_REVIEW fr where fr.FILM_ID = ? order by USEFUL desc LIMIT ?";
+        return jdbcTemplate.query(sqlQuery, reviewRowMapper, filmId, count);
     }
 
     @Override
-    public Optional<Review> setReaction(Integer reviewId, Integer userId, int i) {
-
-        int updated = jdbcTemplate.update(
-                "UPDATE FILM_REVIEW set USEFUL = USEFUL + (?) where ID = ?",
-                i, reviewId);
-        if (updated == 1) {
+    public Optional<Review> setReaction(Integer reviewId, Integer userId, int reactionValue) {
+        String sql = "select count(*) from REVIEW_REACTION where REVIEW_ID = ? and USER_ID = ? and REACTION_VALUE = ?";
+        Integer reactionCount = jdbcTemplate.queryForObject(sql, Integer.class, reviewId, userId, reactionValue);
+        if (reactionCount == null) {
+            return Optional.empty();
+        }
+        if (reactionCount == 0) {
             jdbcTemplate.update(
-                    "MERGE INTO REVIEW_REACTION (REVIEW_ID, USER_ID, REACTION_VALUE) VALUES(?, ?, ?)",
-                    reviewId,
-                    userId,
-                    i);
+                    "UPDATE FILM_REVIEW set USEFUL = USEFUL + (?) where ID = ?",
+                    reactionValue, reviewId);
+            log.info("Добавлена реакция пользователя с user_id={} на отзыв review_id={}", userId, reviewId);
         }
 
-        log.info("Добавлена реакция пользователя с user_id={} на отзыв review_id={}", userId, reviewId);
+        jdbcTemplate.update(
+                "MERGE INTO REVIEW_REACTION (REVIEW_ID, USER_ID, REACTION_VALUE) VALUES(?, ?, ?)",
+                reviewId,
+                userId,
+                reactionValue);
         return getReviewById(reviewId);
     }
 

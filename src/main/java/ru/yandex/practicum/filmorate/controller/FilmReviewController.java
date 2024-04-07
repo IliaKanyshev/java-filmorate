@@ -15,7 +15,7 @@ import java.util.Collection;
 @RestController
 @RequestMapping("/reviews")
 @Slf4j
-//@Validated
+@Validated
 @RequiredArgsConstructor
 public class FilmReviewController {
 
@@ -24,14 +24,18 @@ public class FilmReviewController {
     @PostMapping
     public Review saveReview(@RequestBody @Valid Review review) {
         log.info("Получен запрос на добавление отзыва.");
-        return filmReviewService.saveReview(review);
+        Review reviewSaved = filmReviewService.saveReview(review);
+        log.info("Отзыв {} сохранен.", reviewSaved);
+        return reviewSaved;
     }
 
     @PutMapping
     @Validated({Marker.OnUpdate.class})
     public Review updateReview(@RequestBody @Valid Review review) {
         log.info("Получен запрос на обновление отзыва: {}.", review);
-        return filmReviewService.updateReview(review);
+        Review reviewUpdated = filmReviewService.updateReview(review);
+        log.info("Отзыв обновлен: {}.", review);
+        return reviewUpdated;
     }
 
     @DeleteMapping("/{id}")
