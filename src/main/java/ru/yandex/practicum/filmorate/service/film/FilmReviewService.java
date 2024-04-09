@@ -25,8 +25,9 @@ public class FilmReviewService {
 
     public Review saveReview(Review review) {
         validateReview(review);
-        logStorage.saveLog(review.getUserId(), review.getReviewId(), "REVIEW", "ADD");
-        return filmReviewStorage.saveReview(review);
+        Review reviewSaved = filmReviewStorage.saveReview(review);
+        logStorage.saveLog(reviewSaved.getUserId(), reviewSaved.getReviewId(), "REVIEW", "ADD");
+        return reviewSaved;
     }
 
     private void validateReview(Review review) {
