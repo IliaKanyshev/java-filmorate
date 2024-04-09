@@ -26,14 +26,9 @@ public class FilmReviewService {
     public Review saveReview(Review review) {
         validateReview(review);
 
-        Review reviewSaved = null;
-        try {
-            reviewSaved = filmReviewStorage.saveReview(review);
-            logStorage.saveLog(reviewSaved.getUserId(), reviewSaved.getReviewId(), "REVIEW", "ADD");
-        } catch (Exception e) {
-            logStorage.saveLog(reviewSaved.getUserId(), reviewSaved.getReviewId(), "REVIEW", "ADD");
-            throw e;
-        }
+        Review reviewSaved = filmReviewStorage.saveReview(review);
+        logStorage.saveLog(reviewSaved.getUserId(), reviewSaved.getReviewId(), "REVIEW", "ADD");
+
         return reviewSaved;
     }
 
