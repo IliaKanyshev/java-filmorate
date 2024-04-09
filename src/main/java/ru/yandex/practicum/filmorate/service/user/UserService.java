@@ -10,6 +10,7 @@ import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.film.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.film.LikeStorage;
 import ru.yandex.practicum.filmorate.storage.user.FriendStorage;
+import ru.yandex.practicum.filmorate.storage.user.LogStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.List;
@@ -25,6 +26,7 @@ public class UserService {
     private final GenreStorage genreStorage;
     private final LikeStorage likeStorage;
     private final DirectorStorage directorStorage;
+    private final LogStorage logStorage;
 
     public List<User> getUsers() {
         return userStorage.getUsers();
@@ -53,6 +55,7 @@ public class UserService {
         User user = findUserById(userId);
         User friend = findUserById(friendId);
         friendStorage.addFriend(userId, friendId);
+        logStorage.saveLog(userId, friendId, "FRIEND", "ADD");
         user.setFriends(getUserFriends(userId).stream()
                 .map(User::getId)
                 .collect(Collectors.toSet()));
@@ -64,6 +67,7 @@ public class UserService {
         User user = findUserById(userId);
         User friend = findUserById(friendId);
         friendStorage.deleteFriend(userId, friendId);
+        logStorage.saveLog(userId, friendId, "FRIEND", "REMOVE");
         user.setFriends(getUserFriends(userId).stream()
                 .map(User::getId)
                 .collect(Collectors.toSet()));

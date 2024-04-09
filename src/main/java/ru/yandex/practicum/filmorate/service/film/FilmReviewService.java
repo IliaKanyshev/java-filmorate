@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.storage.film.FilmReviewStorage;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.user.LogStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.text.MessageFormat;
@@ -20,10 +21,15 @@ public class FilmReviewService {
     private final FilmReviewStorage filmReviewStorage;
     private final FilmStorage filmDbStorage;
     private final UserStorage userStorage;
+    private final LogStorage logStorage;
 
     public Review saveReview(Review review) {
         validateReview(review);
+
         Review reviewSaved = filmReviewStorage.saveReview(review);
+        int u = reviewSaved.getUserId();
+        int r = reviewSaved.getReviewId();
+        logStorage.saveLog(u, r, "REVIEW", "ADD");
         return reviewSaved;
     }
 
@@ -34,23 +40,28 @@ public class FilmReviewService {
 
     public Review updateReview(Review review) {
         validateReview(review);
-        return filmReviewStorage.updateReview(review)
+        var rew = filmReviewStorage.updateReview(review)
                 .orElseThrow(
                         () -> new NotFoundException(
-                                MessageFormat.format("Review with id={0} not found", review.getReviewId())
-                        )
-                );
+                                MessageFormat.format("Review with id={0} not found", review.getReviewId())));
+        var u = rew.getUserId();
+        var r = rew.getReviewId();
+        logStorage.saveLog(u, r, "REVIEW", "UPDATE");
+        return rew;
     }
 
     public void deleteReview(Integer id) {
+        var rew = getReviewById(id);
+        int u = rew.getUserId();
+        int r = rew.getReviewId();
+        logStorage.saveLog(u, r, "REVIEW", "REMOVE");
         filmReviewStorage.deleteReviewById(id);
     }
 
     public Review getReviewById(Integer id) {
         return filmReviewStorage.getReviewById(id)
                 .orElseThrow(
-                        () -> new NotFoundException(MessageFormat.format("Review with id={0} not found", id))
-                );
+                        () -> new NotFoundException(MessageFormat.format("Review with id={0} not found", id)));
     }
 
     public Collection<Review> getAllFilmsReviews(Integer filmId, Integer count) {
@@ -63,24 +74,24 @@ public class FilmReviewService {
 
     public Review setLikeForFilmReview(Integer reviewId, Integer userId) {
         userStorage.findUserById(userId);
-        return filmReviewStorage.setReaction(reviewId, userId, 1).orElseThrow(
-                () -> new NotFoundException(MessageFormat.format("Review with id={0} not found", reviewId))
-        );
+        var rew = filmReviewStorage.setReaction(reviewId, userId, 1).orElseThrow(
+                () -> new NotFoundException(MessageFormat.format("Review with id={0} not found", reviewId)));
+        return rew;
     }
 
     public Review setDislikeForFilmReview(Integer reviewId, Integer userId) {
         userStorage.findUserById(userId);
-        return filmReviewStorage.setReaction(reviewId, userId, -1).orElseThrow(
-                () -> new NotFoundException(MessageFormat.format("Review with id={0} not found", reviewId))
-        );
+        var rew = filmReviewStorage.setReaction(reviewId, userId, -1).orElseThrow(
+                () -> new NotFoundException(MessageFormat.format("Review with id={0} not found", reviewId)));
+        return rew;
     }
 
     public Review deleteUserReaction(Integer reviewId, Integer userId) {
         userStorage.findUserById(userId);
-        return filmReviewStorage.deleteUserReaction(reviewId, userId)
+        var rew = filmReviewStorage.deleteUserReaction(reviewId, userId)
                 .orElseThrow(
-                        () -> new NotFoundException(MessageFormat.format("Review with id={0} not found", reviewId))
-                );
+                        () -> new NotFoundException(MessageFormat.format("Review with id={0} not found", reviewId)));
+        return rew;
     }
 
 }

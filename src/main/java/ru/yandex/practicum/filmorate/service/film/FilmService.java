@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.*;
+import ru.yandex.practicum.filmorate.storage.user.LogStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.ArrayList;
@@ -22,6 +23,7 @@ public class FilmService {
     private final LikeStorage likeStorage;
     private final GenreStorage genreStorage;
     private final DirectorStorage directorStorage;
+    private final LogStorage logStorage;
     private final FilmSearch filmSearch;
 
     public List<Film> getFilms() {
@@ -70,6 +72,7 @@ public class FilmService {
         filmStorage.getFilmById(filmId);
         userStorage.findUserById(userId);
         likeStorage.like(filmId, userId);
+        logStorage.saveLog(userId, filmId, "LIKE", "ADD");
         log.info("Пользователь с id {} поставил лайк фильму {}.", userId, getFilm(filmId).getName());
         return getFilm(filmId);
     }
@@ -78,6 +81,7 @@ public class FilmService {
         filmStorage.getFilmById(filmId);
         userStorage.findUserById(userId);
         likeStorage.deleteLike(filmId, userId);
+        logStorage.saveLog(userId, filmId, "LIKE", "REMOVE");
         log.info("Пользователь с id {} удалил лайк у фильма с id {}.", userId, filmId);
         return getFilm(filmId);
     }

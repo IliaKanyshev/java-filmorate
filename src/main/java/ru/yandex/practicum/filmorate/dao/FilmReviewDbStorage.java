@@ -48,7 +48,6 @@ public class FilmReviewDbStorage implements FilmReviewStorage {
         if (reviewCount > 0) {
             throw new ValidationException("Отзыв уже существует");
         }
-
         SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("FILM_REVIEW")
                 .usingGeneratedKeyColumns("ID");
