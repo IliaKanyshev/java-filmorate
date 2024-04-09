@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.storage.film.FilmReviewStorage;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.user.LogStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.text.MessageFormat;
@@ -20,11 +21,12 @@ public class FilmReviewService {
     private final FilmReviewStorage filmReviewStorage;
     private final FilmStorage filmDbStorage;
     private final UserStorage userStorage;
+    private final LogStorage logStorage;
 
     public Review saveReview(Review review) {
         validateReview(review);
-        Review reviewSaved = filmReviewStorage.saveReview(review);
-        return reviewSaved;
+        logStorage.saveLog(review.getUserId(), review.getReviewId(), "REVIEW", "ADD");
+        return filmReviewStorage.saveReview(review);
     }
 
     private void validateReview(Review review) {
@@ -34,6 +36,7 @@ public class FilmReviewService {
 
     public Review updateReview(Review review) {
         validateReview(review);
+        logStorage.saveLog(review.getUserId(), review.getReviewId(), "REVIEW", "UPDATE");
         return filmReviewStorage.updateReview(review)
                 .orElseThrow(
                         () -> new NotFoundException(
@@ -43,6 +46,7 @@ public class FilmReviewService {
     }
 
     public void deleteReview(Integer id) {
+        logStorage.saveLog(getReviewById(id).getUserId(), getReviewById(id).getReviewId(), "REVIEW", "REMOVE");
         filmReviewStorage.deleteReviewById(id);
     }
 

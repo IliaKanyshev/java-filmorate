@@ -1,27 +1,24 @@
 package ru.yandex.practicum.filmorate.dao;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.model.EventLog;
+import ru.yandex.practicum.filmorate.storage.user.LogStorage;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.stereotype.Component;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import ru.yandex.practicum.filmorate.model.EventLog;
-import ru.yandex.practicum.filmorate.storage.user.LogStorage;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class LogDbStorage implements LogStorage {
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
+
+    private final JdbcTemplate jdbcTemplate;
 
     @Override
     public void saveLog(Integer userId, Integer entityId, String eventType, String operation) {
