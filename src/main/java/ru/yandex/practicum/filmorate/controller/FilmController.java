@@ -72,9 +72,21 @@ public class FilmController {
     }
 
     @GetMapping("/popular")
-    public List<Film> getPopularFilms(@RequestParam(defaultValue = "10") Integer count) {
+    public List<Film> getPopularFilmsByGenreAndYear(
+            @RequestParam(name = "count", defaultValue = "10", required = false) Integer count,
+            @RequestParam(name = "genreId", defaultValue = "0", required = false) Integer genreId,
+            @RequestParam(name = "year", defaultValue = "0", required = false) Integer year) {
+        if (genreId != 0 || year != 0) {
+            return filmService.getPopularFilmsByGenreAndYear(count, genreId, year);
+        }
         log.info("Получен запрос на получение списка популярных фильмов.");
         return filmService.getPopularFilms(count);
+    }
+
+    @GetMapping("/search")
+    public List<Film> getFilmsByTitleOrDirector(@RequestParam String query, @RequestParam List<String> by) {
+        log.info("Получен запрос на поиск фильмов по режиссеру или названию.");
+        return filmService.getFilmsByTitleOrDirector(query, by);
     }
 
     @GetMapping("/common")
