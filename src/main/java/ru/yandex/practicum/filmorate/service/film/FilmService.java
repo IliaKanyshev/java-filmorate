@@ -11,8 +11,11 @@ import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.film.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.film.LikeStorage;
 import ru.yandex.practicum.filmorate.storage.user.LogStorage;
+import ru.yandex.practicum.filmorate.storage.film.*;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -25,6 +28,7 @@ public class FilmService {
     private final GenreStorage genreStorage;
     private final DirectorStorage directorStorage;
     private final LogStorage logStorage;
+    private final FilmSearch filmSearch;
 
     public List<Film> getFilms() {
         List<Film> films = filmStorage.getFilms();
@@ -52,6 +56,7 @@ public class FilmService {
         filmStorage.updateFilm(film);
         film.setGenres(genreStorage.getGenreListById(film.getId()));
         film.setDirectors(directorStorage.getDirectorsListById(film.getId()));
+        film.setLikes(likeStorage.getLikesById(film.getId()));
         return getFilm(film.getId());
     }
 
@@ -92,6 +97,7 @@ public class FilmService {
                 film -> {
                     film.getLikes().addAll(likeStorage.getLikesById(film.getId()));
                     film.getGenres().addAll(genreStorage.getGenreListById(film.getId()));
+                    film.setDirectors(directorStorage.getDirectorsListById(film.getId()));
                 }
         );
         return films;
@@ -108,8 +114,28 @@ public class FilmService {
         films.forEach(film -> {
             film.setDirectors(directorStorage.getDirectorsListById(film.getId()));
             film.setGenres(genreStorage.getGenreListById(film.getId()));
+            film.setLikes(likeStorage.getLikesById(film.getId()));
         });
+        log.info("Список отсортированных фильмов по {}", sort);
         return films;
+    }
+
+    public List<Film> getFilmsByTitleOrDirector(String query, List<String> by) {
+        List<Film> films = new ArrayList<>();
+        if (by.contains("director") && by.size() == 1) {
+            films = filmSearch.getFilmListByDirector(query);
+        } else if (by.contains("title") && by.size() == 1) {
+            films = filmSearch.getFilmListByTitle(query);
+        } else if (by.contains("director") && by.contains("title") && by.size() == 2) {
+            films = filmSearch.getFilmListByTitleAndDirector(query);
+        }
+        for (Film film : films) {
+            film.setGenres(genreStorage.getGenreListById(film.getId()));
+            film.setLikes(likeStorage.getLikesById(film.getId()));
+            film.setDirectors(directorStorage.getDirectorsListById(film.getId()));
+            return films;
+        }
+        return Collections.emptyList();
     }
 
     public List<Film> getCommonFilms(int userId, int friendId) {
@@ -121,5 +147,15 @@ public class FilmService {
             film.setGenres(genreStorage.getGenreListById(film.getId()));
         });
         return commonFilms;
+    }
+
+    public List<Film> getPopularFilmsByGenreAndYear(Integer count, Integer genreId, Integer year) {
+        List<Film> films = filmStorage.getPopularFilmsByGenreAndYear(count, genreId, year);
+        for (Film film : films) {
+            film.setGenres(genreStorage.getGenreListById(film.getId()));
+            film.setLikes(likeStorage.getLikesById(film.getId()));
+            film.setDirectors(directorStorage.getDirectorsListById(film.getId()));
+        }
+        return films;
     }
 }
