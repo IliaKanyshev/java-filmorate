@@ -46,11 +46,8 @@ public class FilmReviewDbStorage implements FilmReviewStorage {
             return null;
         }
         if (reviewCount > 0) {
-            /* LogDbStorage logDbStorage = new LogDbStorage(this.jdbcTemplate);
-            logDbStorage.saveLog(review.getUserId(), review.getReviewId(), "REVIEW", "ADD"); */
             throw new ValidationException("Отзыв уже существует");
         }
-
         SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("FILM_REVIEW")
                 .usingGeneratedKeyColumns("ID");
