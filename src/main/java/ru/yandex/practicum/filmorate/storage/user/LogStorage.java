@@ -1,8 +1,8 @@
 package ru.yandex.practicum.filmorate.storage.user;
 
-import java.util.List;
-
 import ru.yandex.practicum.filmorate.model.EventLog;
+
+import java.util.List;
 
 public interface LogStorage {
 
