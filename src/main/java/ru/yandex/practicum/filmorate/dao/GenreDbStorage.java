@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.dao;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -11,7 +12,10 @@ import ru.yandex.practicum.filmorate.storage.film.GenreStorage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
@@ -39,11 +43,38 @@ public class GenreDbStorage implements GenreStorage {
 
     @Override
     public List<Genre> getGenreListById(Integer id) {
-        String sqlQuery = "SELECT distinct gt.genre_id, gt.name FROM genre_type gt " +
+        String sqlQuery =
+                "SELECT distinct gt.genre_id, gt.name FROM genre_type gt " +
                 "INNER JOIN genre g ON gt.genre_id = g.genre_id " +
                 "WHERE g.film_id = ?";
         return jdbcTemplate.query(sqlQuery, this::mapToGenre, id);
     }
+
+
+    @Override
+    public Map<Integer, List<Genre>> getFilmIdGenresMap() {
+        String sqlQuery =
+                "SELECT g.FILM_ID, gt.genre_id, gt.name " +
+                  "FROM GENRE g " +
+                  "JOIN GENRE_TYPE gt ON g.genre_id = gt.genre_id ";
+
+        SqlRowSet filmGenreSet = jdbcTemplate.queryForRowSet(sqlQuery);
+
+        HashMap<Integer, List<Genre>> filmGenresMap = new HashMap<>();
+
+        while (filmGenreSet.next()) {
+            Integer filmId = filmGenreSet.getInt("FILM_ID");
+
+            Genre genre = Genre.builder()
+                    .id(filmGenreSet.getInt("genre_id"))
+                    .name(filmGenreSet.getString("name"))
+                    .build();
+            filmGenresMap.computeIfAbsent(filmId, flmId -> new ArrayList<>()).add(genre);
+        }
+        log.info("Словарь жанров для фильмов сформирован: \n {}" , filmGenresMap);
+        return filmGenresMap;
+    }
+
 
     public List<Integer> getGenresIds() {
         return getGenresList().stream().map(Genre::getId).collect(Collectors.toList());

@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.film.*;
 import ru.yandex.practicum.filmorate.storage.user.LogStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
@@ -13,6 +14,7 @@ import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -89,10 +91,11 @@ public class FilmService {
     public List<Film> getPopularFilms(Integer count) {
         log.info("Топ {} популярных фильмов", count);
         List<Film> films = likeStorage.getPopularFilms(count);
+        Map<Integer, List<Genre>> filmIdGenresMap = genreStorage.getFilmIdGenresMap();
         films.forEach(
                 film -> {
                     film.getLikes().addAll(likeStorage.getLikesById(film.getId()));
-                    film.getGenres().addAll(genreStorage.getGenreListById(film.getId()));
+                    film.setGenres(filmIdGenresMap.getOrDefault(film.getId(), new ArrayList<>()));
                     film.setDirectors(directorStorage.getDirectorsListById(film.getId()));
                 }
         );
