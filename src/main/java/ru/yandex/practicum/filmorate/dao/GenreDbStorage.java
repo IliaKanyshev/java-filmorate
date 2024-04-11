@@ -45,8 +45,8 @@ public class GenreDbStorage implements GenreStorage {
     public List<Genre> getGenreListById(Integer id) {
         String sqlQuery =
                 "SELECT distinct gt.genre_id, gt.name FROM genre_type gt " +
-                "INNER JOIN genre g ON gt.genre_id = g.genre_id " +
-                "WHERE g.film_id = ?";
+                        "INNER JOIN genre g ON gt.genre_id = g.genre_id " +
+                        "WHERE g.film_id = ?";
         return jdbcTemplate.query(sqlQuery, this::mapToGenre, id);
     }
 
@@ -55,8 +55,8 @@ public class GenreDbStorage implements GenreStorage {
     public Map<Integer, List<Genre>> getFilmIdGenresMap() {
         String sqlQuery =
                 "SELECT g.FILM_ID, gt.genre_id, gt.name " +
-                  "FROM GENRE g " +
-                  "JOIN GENRE_TYPE gt ON g.genre_id = gt.genre_id ";
+                        "FROM GENRE g " +
+                        "JOIN GENRE_TYPE gt ON g.genre_id = gt.genre_id ";
 
         SqlRowSet filmGenreSet = jdbcTemplate.queryForRowSet(sqlQuery);
 
@@ -71,7 +71,7 @@ public class GenreDbStorage implements GenreStorage {
                     .build();
             filmGenresMap.computeIfAbsent(filmId, flmId -> new ArrayList<>()).add(genre);
         }
-        log.info("Словарь жанров для фильмов сформирован: \n {}" , filmGenresMap);
+        log.info("Словарь жанров для фильмов сформирован: \n {}", filmGenresMap);
         return filmGenresMap;
     }
 

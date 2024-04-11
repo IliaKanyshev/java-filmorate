@@ -65,7 +65,7 @@ public class LikeDbStorage implements LikeStorage {
             Integer userId = filmLikeSet.getInt("USER_ID");
             filmLikeMap.computeIfAbsent(filmId, flmId -> new HashSet<>()).add(userId);
         }
-        log.info("Множество соответствующих лайков для всех фильмов сформировано: \n {}" , filmLikeMap);
+        log.info("Множество соответствующих лайков для всех фильмов сформировано: \n {}", filmLikeMap);
         return filmLikeMap;
     }
 }

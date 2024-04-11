@@ -67,8 +67,8 @@ public class FilmDbStorage implements FilmStorage {
     public Film getFilmById(Integer id) {
         String sqlQuery =
                 "SELECT f.*, m.NAME FROM FILMS f " +
-                "left join MPA m on f.MPA_RATING_ID = m.MPA_RATING_ID " +
-                "WHERE FILM_ID = ?";
+                        "left join MPA m on f.MPA_RATING_ID = m.MPA_RATING_ID " +
+                        "WHERE FILM_ID = ?";
         try {
             Film film = jdbcTemplate.queryForObject(sqlQuery, filmMapper, id);
             log.info("Фильм с id {} найден.", id);
@@ -111,9 +111,9 @@ public class FilmDbStorage implements FilmStorage {
         log.info("Получение общих фильмов у пользователей с ID {} и {}", userId, friendId);
         String sql =
                 "SELECT f.*, mpa.name FROM films f " +
-                "JOIN likes l1 ON f.film_id = l1.film_id AND l1.user_id = ? " +
-                "JOIN likes l2 ON f.film_id = l2.film_id AND l2.user_id = ? " +
-                "LEFT JOIN mpa mpa ON mpa.mpa_rating_id = f.mpa_rating_id";
+                        "JOIN likes l1 ON f.film_id = l1.film_id AND l1.user_id = ? " +
+                        "JOIN likes l2 ON f.film_id = l2.film_id AND l2.user_id = ? " +
+                        "LEFT JOIN mpa mpa ON mpa.mpa_rating_id = f.mpa_rating_id";
         return jdbcTemplate.query(sql, filmMapper, userId, friendId);
     }
 
@@ -142,20 +142,20 @@ public class FilmDbStorage implements FilmStorage {
                 "SELECT * FROM FILMS F " +
                         "JOIN MPA M ON F.MPA_RATING_ID = M.MPA_RATING_ID " +
                         "WHERE F.FILM_ID IN (" +
-                                "SELECT FILM_ID FROM LIKES " +
-                                   "WHERE USER_ID IN (" +
-                                            "SELECT L1.USER_ID FROM LIKES L1 " +
-                                            "RIGHT JOIN LIKES L2 ON L2.FILM_ID = L1.FILM_ID " +
-                                            "GROUP BY L1.USER_ID, L2.USER_ID " +
-                                            "HAVING L1.USER_ID IS NOT NULL " +
-                                            "AND L1.USER_ID != ? " +
-                                            "AND L2.USER_ID = ? " +
-                                            "ORDER BY COUNT(L1.USER_ID) DESC " +
-                                            "LIMIT 3 ) " +
-                                     "AND FILM_ID NOT IN (" +
-                                                        "SELECT FILM_ID FROM LIKES " +
-                                                        "WHERE USER_ID = ?)" +
-                                                        ")";
+                        "SELECT FILM_ID FROM LIKES " +
+                        "WHERE USER_ID IN (" +
+                        "SELECT L1.USER_ID FROM LIKES L1 " +
+                        "RIGHT JOIN LIKES L2 ON L2.FILM_ID = L1.FILM_ID " +
+                        "GROUP BY L1.USER_ID, L2.USER_ID " +
+                        "HAVING L1.USER_ID IS NOT NULL " +
+                        "AND L1.USER_ID != ? " +
+                        "AND L2.USER_ID = ? " +
+                        "ORDER BY COUNT(L1.USER_ID) DESC " +
+                        "LIMIT 3 ) " +
+                        "AND FILM_ID NOT IN (" +
+                        "SELECT FILM_ID FROM LIKES " +
+                        "WHERE USER_ID = ?)" +
+                        ")";
 
         return jdbcTemplate.query(sql, filmMapper, userId, userId, userId);
     }
