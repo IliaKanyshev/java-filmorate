@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.film.*;
@@ -26,17 +27,8 @@ public class FilmService {
     private final FilmSearch filmSearch;
 
     public List<Film> getFilms() {
-
         List<Film> films = filmStorage.getFilms();
-        Map<Integer, List<Genre>> filmIdGenresMap = genreStorage.getFilmIdGenresMap();
-        Map<Integer, Set<Integer>> filmLikesMap = likeStorage.getFilmLikesMap();
-        films.forEach(
-                film -> {
-                    film.setLikes(filmLikesMap.getOrDefault(film.getId(), new HashSet<>()));
-                    film.setGenres(filmIdGenresMap.getOrDefault(film.getId(), new ArrayList<>()));
-                    film.setDirectors(directorStorage.getDirectorsListById(film.getId()));
-                }
-        );
+        enReachFilmsWithMetaData(films);
         return films;
     }
 
@@ -93,17 +85,10 @@ public class FilmService {
     public List<Film> getPopularFilms(Integer count) {
         log.info("Топ {} популярных фильмов", count);
         List<Film> films = likeStorage.getPopularFilms(count);
-        Map<Integer, List<Genre>> filmIdGenresMap = genreStorage.getFilmIdGenresMap();
-        Map<Integer, Set<Integer>> filmLikesMap = likeStorage.getFilmLikesMap();
-        films.forEach(
-                film -> {
-                    film.setLikes(filmLikesMap.getOrDefault(film.getId(), new HashSet<>()));
-                    film.setGenres(filmIdGenresMap.getOrDefault(film.getId(), new ArrayList<>()));
-                    film.setDirectors(directorStorage.getDirectorsListById(film.getId()));
-                }
-        );
+        enReachFilmsWithMetaData(films);
         return films;
     }
+
 
     public List<Film> getFilmsByDirector(int id, String sort) {
         if (directorStorage.getById(id).isEmpty()) {
@@ -113,11 +98,7 @@ public class FilmService {
             throw new NotFoundException("Неправильно передан параметр сортировки");
         }
         List<Film> films = filmStorage.getSortedFilms(id, sort);
-        films.forEach(film -> {
-            film.setDirectors(directorStorage.getDirectorsListById(film.getId()));
-            film.setGenres(genreStorage.getGenreListById(film.getId()));
-            film.setLikes(likeStorage.getLikesById(film.getId()));
-        });
+        enReachFilmsWithMetaData(films);
         log.info("Список отсортированных фильмов по {}", sort);
         return films;
     }
@@ -131,33 +112,34 @@ public class FilmService {
         } else if (by.contains("director") && by.contains("title") && by.size() == 2) {
             films = filmSearch.getFilmListByTitleAndDirector(query);
         }
-        for (Film film : films) {
-            film.setGenres(genreStorage.getGenreListById(film.getId()));
-            film.setLikes(likeStorage.getLikesById(film.getId()));
-            film.setDirectors(directorStorage.getDirectorsListById(film.getId()));
-            return films;
-        }
-        return Collections.emptyList();
+        enReachFilmsWithMetaData(films);
+        return films;
     }
 
     public List<Film> getCommonFilms(int userId, int friendId) {
         userStorage.findUserById(userId);
         userStorage.findUserById(friendId);
         List<Film> commonFilms = filmStorage.getCommonFilms(userId, friendId);
-        commonFilms.forEach(film -> {
-            film.setDirectors(directorStorage.getDirectorsListById(film.getId()));
-            film.setGenres(genreStorage.getGenreListById(film.getId()));
-        });
+        enReachFilmsWithMetaData(commonFilms);
         return commonFilms;
     }
 
     public List<Film> getPopularFilmsByGenreAndYear(Integer count, Integer genreId, Integer year) {
         List<Film> films = filmStorage.getPopularFilmsByGenreAndYear(count, genreId, year);
-        for (Film film : films) {
-            film.setGenres(genreStorage.getGenreListById(film.getId()));
-            film.setLikes(likeStorage.getLikesById(film.getId()));
-            film.setDirectors(directorStorage.getDirectorsListById(film.getId()));
-        }
+        enReachFilmsWithMetaData(films);
         return films;
+    }
+
+    private void enReachFilmsWithMetaData(List<Film> films) {
+        Map<Integer, List<Genre>> filmIdGenresMap = genreStorage.getFilmIdGenresMap();
+        Map<Integer, List<Director>> filmIdDirectorsMap = directorStorage.getFilmDirectorsMap();
+        Map<Integer, Set<Integer>> filmLikesMap = likeStorage.getFilmLikesMap();
+        films.forEach(
+                film -> {
+                    film.setLikes(filmLikesMap.getOrDefault(film.getId(), new HashSet<>()));
+                    film.setGenres(filmIdGenresMap.getOrDefault(film.getId(), new ArrayList<>()));
+                    film.setDirectors(filmIdDirectorsMap.getOrDefault(film.getId(), new ArrayList<>()));
+                }
+        );
     }
 }

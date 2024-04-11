@@ -4,6 +4,7 @@ import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public interface DirectorStorage {
@@ -20,4 +21,6 @@ public interface DirectorStorage {
     List<Director> getDirectorsListById(Integer id);
 
     void updateFilmDirector(Film film);
+
+    Map<Integer, List<Director>> getFilmDirectorsMap();
 }

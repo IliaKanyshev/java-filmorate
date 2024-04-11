@@ -5,15 +5,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
+import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.DirectorStorage;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Repository
 @Slf4j
@@ -96,4 +94,29 @@ public class DirectorDbStorage implements DirectorStorage {
             }
         }
     }
+
+    @Override
+    public Map<Integer, List<Director>> getFilmDirectorsMap() {
+        String sqlQuery =
+                "SELECT df.film_id, d.* " +
+                        "FROM DIRECTOR_FILM df " +
+                        "JOIN DIRECTORS d ON df.director_id = d.director_id ";
+
+        SqlRowSet filmDirectorsSet = jdbcTemplate.queryForRowSet(sqlQuery);
+
+        HashMap<Integer, List<Director>> filmDirectorsMap = new HashMap<>();
+
+        while (filmDirectorsSet.next()) {
+            Integer filmId = filmDirectorsSet.getInt("FILM_ID");
+
+            Director director = Director.builder()
+                    .id(filmDirectorsSet.getInt("director_id"))
+                    .name(filmDirectorsSet.getString("name"))
+                    .build();
+            filmDirectorsMap.computeIfAbsent(filmId, flmId -> new ArrayList<>()).add(director);
+        }
+        log.info("Словарь режисеров для фильмов сформирован: \n {}", filmDirectorsMap);
+        return filmDirectorsMap;
+    }
+
 }
