@@ -11,10 +11,7 @@ import ru.yandex.practicum.filmorate.storage.film.*;
 import ru.yandex.practicum.filmorate.storage.user.LogStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -29,12 +26,17 @@ public class FilmService {
     private final FilmSearch filmSearch;
 
     public List<Film> getFilms() {
+
         List<Film> films = filmStorage.getFilms();
-        for (Film film : films) {
-            film.setGenres(genreStorage.getGenreListById(film.getId()));
-            film.setLikes(likeStorage.getLikesById(film.getId()));
-            film.setDirectors(directorStorage.getDirectorsListById(film.getId()));
-        }
+        Map<Integer, List<Genre>> filmIdGenresMap = genreStorage.getFilmIdGenresMap();
+        Map<Integer, Set<Integer>> filmLikesMap = likeStorage.getFilmLikesMap();
+        films.forEach(
+                film -> {
+                    film.setLikes(filmLikesMap.getOrDefault(film.getId(), new HashSet<>()));
+                    film.setGenres(filmIdGenresMap.getOrDefault(film.getId(), new ArrayList<>()));
+                    film.setDirectors(directorStorage.getDirectorsListById(film.getId()));
+                }
+        );
         return films;
     }
 
@@ -92,9 +94,10 @@ public class FilmService {
         log.info("Топ {} популярных фильмов", count);
         List<Film> films = likeStorage.getPopularFilms(count);
         Map<Integer, List<Genre>> filmIdGenresMap = genreStorage.getFilmIdGenresMap();
+        Map<Integer, Set<Integer>> filmLikesMap = likeStorage.getFilmLikesMap();
         films.forEach(
                 film -> {
-                    film.getLikes().addAll(likeStorage.getLikesById(film.getId()));
+                    film.setLikes(filmLikesMap.getOrDefault(film.getId(), new HashSet<>()));
                     film.setGenres(filmIdGenresMap.getOrDefault(film.getId(), new ArrayList<>()));
                     film.setDirectors(directorStorage.getDirectorsListById(film.getId()));
                 }

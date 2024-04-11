@@ -9,9 +9,7 @@ import ru.yandex.practicum.filmorate.dao.mapper.FilmMapper;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.LikeStorage;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Component
 @RequiredArgsConstructor
@@ -55,14 +53,19 @@ public class LikeDbStorage implements LikeStorage {
         return likes;
     }
 
- /*   private Film mapRowToFilm(ResultSet resultSet, int rowNum) throws SQLException {
-        return Film.builder()
-                .id(resultSet.getInt("film_id"))
-                .name(resultSet.getString("name"))
-                .description(resultSet.getString("description"))
-                .releaseDate(resultSet.getDate("release_date").toLocalDate())
-                .duration(resultSet.getInt("duration"))
-                .mpa(mpaStorage.getMpaById(resultSet.getInt("mpa_rating_id")))
-                .build();
-    } */
+    @Override
+    public Map<Integer, Set<Integer>> getFilmLikesMap() {
+        String sqlQuery = "SELECT * FROM LIKES ";
+        SqlRowSet filmLikeSet = jdbcTemplate.queryForRowSet(sqlQuery);
+
+        HashMap<Integer, Set<Integer>> filmLikeMap = new HashMap<>();
+
+        while (filmLikeSet.next()) {
+            Integer filmId = filmLikeSet.getInt("FILM_ID");
+            Integer userId = filmLikeSet.getInt("USER_ID");
+            filmLikeMap.computeIfAbsent(filmId, flmId -> new HashSet<>()).add(userId);
+        }
+        log.info("Множество соответствующих лайков для всех фильмов сформировано: \n {}" , filmLikeMap);
+        return filmLikeMap;
+    }
 }
