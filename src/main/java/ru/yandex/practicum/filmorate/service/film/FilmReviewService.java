@@ -27,9 +27,9 @@ public class FilmReviewService {
         validateReview(review);
 
         Review reviewSaved = filmReviewStorage.saveReview(review);
-        int u = reviewSaved.getUserId();
-        int r = reviewSaved.getReviewId();
-        logStorage.saveLog(u, r, "REVIEW", "ADD");
+        int reviewSavedUserId = reviewSaved.getUserId();
+        int reviewSavedReviewId = reviewSaved.getReviewId();
+        logStorage.saveLog(reviewSavedUserId, reviewSavedReviewId, "REVIEW", "ADD");
         return reviewSaved;
     }
 
@@ -40,21 +40,21 @@ public class FilmReviewService {
 
     public Review updateReview(Review review) {
         validateReview(review);
-        var rew = filmReviewStorage.updateReview(review)
+        var updatedReview = filmReviewStorage.updateReview(review)
                 .orElseThrow(
                         () -> new NotFoundException(
                                 MessageFormat.format("Review with id={0} not found", review.getReviewId())));
-        var u = rew.getUserId();
-        var r = rew.getReviewId();
-        logStorage.saveLog(u, r, "REVIEW", "UPDATE");
-        return rew;
+        var userIdForUpdatedReview = updatedReview.getUserId();
+        var reviewIdForUpdatedReview = updatedReview.getReviewId();
+        logStorage.saveLog(userIdForUpdatedReview, reviewIdForUpdatedReview, "REVIEW", "UPDATE");
+        return updatedReview;
     }
 
     public void deleteReview(Integer id) {
-        var rew = getReviewById(id);
-        int u = rew.getUserId();
-        int r = rew.getReviewId();
-        logStorage.saveLog(u, r, "REVIEW", "REMOVE");
+        var reviewForDelete = getReviewById(id);
+        int userIdForDeletedReview = reviewForDelete.getUserId();
+        int reviewIdForDeletedReview = reviewForDelete.getReviewId();
+        logStorage.saveLog(userIdForDeletedReview, reviewIdForDeletedReview, "REVIEW", "REMOVE");
         filmReviewStorage.deleteReviewById(id);
     }
 
@@ -74,24 +74,24 @@ public class FilmReviewService {
 
     public Review setLikeForFilmReview(Integer reviewId, Integer userId) {
         userStorage.findUserById(userId);
-        var rew = filmReviewStorage.setReaction(reviewId, userId, 1).orElseThrow(
+        var updatedReview = filmReviewStorage.setReaction(reviewId, userId, 1).orElseThrow(
                 () -> new NotFoundException(MessageFormat.format("Review with id={0} not found", reviewId)));
-        return rew;
+        return updatedReview;
     }
 
     public Review setDislikeForFilmReview(Integer reviewId, Integer userId) {
         userStorage.findUserById(userId);
-        var rew = filmReviewStorage.setReaction(reviewId, userId, -1).orElseThrow(
+        var updatedReview = filmReviewStorage.setReaction(reviewId, userId, -1).orElseThrow(
                 () -> new NotFoundException(MessageFormat.format("Review with id={0} not found", reviewId)));
-        return rew;
+        return updatedReview;
     }
 
     public Review deleteUserReaction(Integer reviewId, Integer userId) {
         userStorage.findUserById(userId);
-        var rew = filmReviewStorage.deleteUserReaction(reviewId, userId)
+        var updatedReview = filmReviewStorage.deleteUserReaction(reviewId, userId)
                 .orElseThrow(
                         () -> new NotFoundException(MessageFormat.format("Review with id={0} not found", reviewId)));
-        return rew;
+        return updatedReview;
     }
 
 }
