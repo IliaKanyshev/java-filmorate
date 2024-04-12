@@ -17,12 +17,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @SpringBootTest
 public class UserValidationTest {
     private static final Validator validator;
-    private User user;
 
     static {
         ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory();
         validator = validatorFactory.usingContext().getValidator();
     }
+
+    private User user;
 
     @BeforeEach
     public void init() {

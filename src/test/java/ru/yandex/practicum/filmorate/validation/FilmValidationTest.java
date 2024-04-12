@@ -20,12 +20,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class FilmValidationTest {
     private static final Validator validator;
 
-    private Film film;
-
     static {
         ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory();
         validator = validatorFactory.usingContext().getValidator();
     }
+
+    private Film film;
 
     @BeforeEach
     public void init() {

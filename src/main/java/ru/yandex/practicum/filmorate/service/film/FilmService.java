@@ -130,6 +130,14 @@ public class FilmService {
         return films;
     }
 
+    public List<Film> getRecommendations(Integer userId) {
+        userStorage.findUserById(userId);
+        List<Film> films = filmStorage.getRecommendations(userId);
+        enReachFilmsWithMetaData(films);
+        log.info("Список рекомендованых фильмов для пользователя с id {} получен: {}", userId, films);
+        return films;
+    }
+
     private void enReachFilmsWithMetaData(List<Film> films) {
         Map<Integer, List<Genre>> filmIdGenresMap = genreStorage.getFilmIdGenresMap();
         Map<Integer, List<Director>> filmIdDirectorsMap = directorStorage.getFilmDirectorsMap();

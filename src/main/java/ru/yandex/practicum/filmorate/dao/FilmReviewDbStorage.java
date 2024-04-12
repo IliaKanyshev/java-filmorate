@@ -20,8 +20,8 @@ import java.util.Optional;
 @Slf4j
 @RequiredArgsConstructor
 public class FilmReviewDbStorage implements FilmReviewStorage {
+    private static final String SQL_GET_ALL_REVIEWS = "select * from FILM_REVIEW order by USEFUL desc";
     private final JdbcTemplate jdbcTemplate;
-
     private final RowMapper<Review> reviewRowMapper = (rs, rowNum) -> Review.builder()
             .reviewId(rs.getInt("ID"))
             .content(rs.getString("CONTENT"))
@@ -30,8 +30,6 @@ public class FilmReviewDbStorage implements FilmReviewStorage {
             .filmId(rs.getInt("FILM_ID"))
             .useful(rs.getInt("USEFUL"))
             .build();
-
-    private static final String SQL_GET_ALL_REVIEWS = "select * from FILM_REVIEW order by USEFUL desc";
 
     @Override
     public List<Review> getAllReviews() {

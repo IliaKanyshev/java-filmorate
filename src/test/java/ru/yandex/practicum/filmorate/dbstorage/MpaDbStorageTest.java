@@ -35,7 +35,6 @@ public class MpaDbStorageTest {
                 .duration(100)
                 .releaseDate(LocalDate.of(2020, 12, 12))
                 .mpa(new Mpa(1, "G"))
-             //   .genres(List.of(new Genre(1, "Комедия")))
                 .build();
     }
 
