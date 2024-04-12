@@ -13,13 +13,13 @@ import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.film.FilmService;
 
 import java.time.LocalDate;
-import java.util.HashSet;
 import java.util.List;
 
 import static org.hamcrest.Matchers.containsString;
@@ -39,6 +39,8 @@ public class FilmControllerTest {
     protected MockMvc mockMvc;
     @Autowired
     protected ObjectMapper objectMapper;
+    @Autowired
+    protected FilmService filmService;
     private Film film;
     private Film film2;
     private Film film3;
@@ -55,8 +57,6 @@ public class FilmControllerTest {
                 .duration(100)
                 .releaseDate(LocalDate.of(2020, 12, 12))
                 .mpa(new Mpa(1, "G"))
-                .genres(List.of(new Genre(1, "Комедия")))
-                .likes(new HashSet<>())
                 .build();
         film2 = Film.builder()
                 .id(1)
@@ -65,8 +65,6 @@ public class FilmControllerTest {
                 .duration(100)
                 .releaseDate(LocalDate.of(2020, 12, 12))
                 .mpa(new Mpa(1, "G"))
-                .genres(List.of(new Genre(1, "Комедия")))
-                .likes(new HashSet<>())
                 .build();
         film3 = Film.builder()
                 .id(3)
@@ -84,8 +82,6 @@ public class FilmControllerTest {
                 .duration(100)
                 .releaseDate(LocalDate.of(2020, 12, 12))
                 .mpa(new Mpa(1, "G"))
-                .genres(List.of(new Genre(1, "Комедия")))
-                .likes(new HashSet<>())
                 .build();
         user = User.builder()
                 .id(1)
@@ -268,5 +264,34 @@ public class FilmControllerTest {
                 .andExpect(status().is(200));
         mockMvc.perform(get("/films/popular"))
                 .andExpect(jsonPath("$.*", hasSize(3)));
+    }
+
+    @SneakyThrows
+    @Test
+    public void getFilmsByTitleOrDirectorTest() {
+        Director director = Director.builder().id(1).name("director").build();
+        mockMvc.perform(post("/directors")
+                        .content(objectMapper.writeValueAsString(director)).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().is(200));
+        mockMvc.perform(post("/films")
+                        .content(objectMapper.writeValueAsString(film))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().is(200));
+        film.setDirectors(List.of(director));
+        filmService.updateFilm(film);
+        mockMvc.perform(get("/films/search")
+                        .param("query", "rector").param("by", "director"))
+                .andExpect(status().is(200))
+                .andExpect(jsonPath("$.*", hasSize(1)));
+        mockMvc.perform(get("/films/search")
+                        .param("query", "ilm")
+                        .param("by", "title"))
+                .andExpect(status().is(200))
+                .andExpect(jsonPath("$.*", hasSize(1)));
+        mockMvc.perform(get("/films/search")
+                        .param("query", "lm")
+                        .param("by", "director,title"))
+                .andExpect(status().is(200))
+                .andExpect(jsonPath("$.*", hasSize(1)));
     }
 }

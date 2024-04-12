@@ -7,18 +7,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.Mpa;
-import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.service.film.FilmService;
+import ru.yandex.practicum.filmorate.storage.film.DirectorStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
@@ -27,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class FilmServiceTest {
     private final FilmService filmService;
     private final UserStorage userStorage;
+    private final DirectorStorage directorStorage;
     private Film film;
     private Film film2;
     private Film film3;
@@ -43,18 +42,19 @@ public class FilmServiceTest {
                 .duration(100)
                 .releaseDate(LocalDate.of(2020, 12, 12))
                 .mpa(new Mpa(1, "G"))
-                .genres(List.of(new Genre(1, "Комедия")))
-                .likes(new HashSet<>())
+                //.(List.of(new Genre(1, "Комедия")))
+                //   .likes(new HashSet<>())
                 .build();
+        film.getGenres().add((new Genre(1, "Комедия")));
         film2 = Film.builder()
                 .id(2)
-                .name("film2")
+                .name("updated")
                 .description("filmDescr2")
                 .releaseDate(LocalDate.of(1991, 12, 12))
                 .duration(100)
                 .mpa(new Mpa(1, "G"))
-                .genres(List.of(new Genre(1, "Комедия")))
-                .likes(new HashSet<>())
+                // .genres(List.of(new Genre(1, "Комедия")))
+                //  .likes(new HashSet<>())
                 .build();
         film3 = Film.builder()
                 .id(3)
@@ -65,18 +65,18 @@ public class FilmServiceTest {
                 .releaseDate(LocalDate.of(1852, 12, 12))
                 .duration(0)
                 .mpa(new Mpa(1, "G"))
-                .genres(List.of(new Genre(1, "Комедия")))
-                .likes(new HashSet<>())
+                //    .genres(List.of(new Genre(1, "Комедия")))
+                //   .likes(new HashSet<>())
                 .build();
         film4 = Film.builder()
                 .id(4)
-                .name("film4")
+                .name("dated")
                 .description("filmDescr4")
                 .releaseDate(LocalDate.of(1992, 12, 12))
                 .duration(100)
                 .mpa(new Mpa(1, "G"))
-                .genres(List.of(new Genre(1, "Комедия")))
-                .likes(new HashSet<>())
+                //    .genres(List.of(new Genre(1, "Комедия")))
+                //    .likes(new HashSet<>())
                 .build();
         user = User.builder()
                 .id(1)
@@ -160,5 +160,36 @@ public class FilmServiceTest {
         filmService.createFilm(film2);
         filmService.like(2, 1);
         assertEquals(filmService.getPopularFilms(10).size(), 2);
+    }
+
+    @Test
+    public void getFilmsByTitleOrDirectorTest() {
+        Director director = Director.builder()
+                .id(1)
+                .name("director")
+                .build();
+        Director director2 = Director.builder()
+                .id(2)
+                .name("Vasya")
+                .build();
+        Director director3 = Director.builder()
+                .id(3)
+                .name("rector")
+                .build();
+        filmService.createFilm(film);
+        filmService.createFilm(film2);
+        filmService.createFilm(film4);
+        directorStorage.createDirector(director);
+        directorStorage.createDirector(director2);
+        directorStorage.createDirector(director3);
+        film.setDirectors(List.of(director));
+        film2.setDirectors(List.of(director2));
+        film4.setDirectors(List.of(director3));
+        filmService.updateFilm(film);
+        filmService.updateFilm(film2);
+        filmService.updateFilm(film4);
+        assertEquals(2, filmService.getFilmsByTitleOrDirector("rector", List.of("director")).size());
+        assertEquals(1, filmService.getFilmsByTitleOrDirector("vas", List.of("director")).size());
+        assertEquals(2, filmService.getFilmsByTitleOrDirector("dated", List.of("title")).size());
     }
 }

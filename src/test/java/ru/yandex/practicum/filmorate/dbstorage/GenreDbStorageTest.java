@@ -37,13 +37,16 @@ public class GenreDbStorageTest {
                 .duration(100)
                 .releaseDate(LocalDate.of(2020, 12, 12))
                 .mpa(new Mpa(1, "G"))
-                .genres(List.of(new Genre(1, "Комедия")))
+                //.(List.of(new Genre(1, "Комедия")))
+                //   .likes(new HashSet<>())
                 .build();
+        film.getGenres().add((new Genre(1, "Комедия")));
     }
 
     @Test
     public void getGenreByIdTest() {
         filmDbStorage.createFilm(film);
+        genreDbStorage.updateFilmGenres(film);
         List<Genre> genres = genreDbStorage.getGenreListById(film.getId());
         List<Genre> genres1 = film.getGenres();
         assertThat(genres)
@@ -60,6 +63,7 @@ public class GenreDbStorageTest {
     @Test
     public void getGenreListByIdTest() {
         filmDbStorage.createFilm(film);
+        genreDbStorage.updateFilmGenres(film);
         assertEquals(genreDbStorage.getGenreListById(film.getId()).size(), 1);
     }
 }
